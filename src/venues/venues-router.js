@@ -15,7 +15,7 @@ VenuesRouter.route('/:city/:state/:type').get((req, res) => {
   });
 });
 
-VenuesRouter.route('/reviews/:venueId').get((req, res) => {
+VenuesRouter.route('/:venueId/reviews').get((req, res) => {
   VenuesService.getReviewsByVenue(req.app.get('db'), req.params.venueId).then(
     reviews => {
       res.json(reviews);
@@ -23,9 +23,10 @@ VenuesRouter.route('/reviews/:venueId').get((req, res) => {
   );
 });
 
-VenuesRouter.route('/').post(jsonBodyParser, (req, res, next) => {
+VenuesRouter.route('/addVenue').post(jsonBodyParser, (req, res, next) => {
   const { venue_name, venue_type, address, city, state, zipcode } = req.body;
   const newVenue = { venue_name, venue_type, address, city, state, zipcode };
+
 
   for (const [key, value] of Object.entries(newVenue))
     if (value === null) {
