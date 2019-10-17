@@ -10,12 +10,13 @@ const ReviewsService = {
       .then(([Review]) => Review);
   },
 
-  addAmenities(db, amenities, venueId) {
+  addAmenities(db, amenities) {
     return db
       .insert(amenities)
       .into('amenities_venues')
       .returning('*')
-      .then(([amenities]) => amenities);
+      .then(([amenities]) => amenities)
+      .then(console.log('Amenity added successfully!'));
   },
 
   serializeReview(newReview) {
@@ -30,7 +31,7 @@ const ReviewsService = {
     };
   },
 
-  getReviewsByVenue(db, Review_id) {
+  getReviewsByVenue(db, venue_id) {
     return db
       .from('reviews')
       .select(
@@ -40,10 +41,10 @@ const ReviewsService = {
         'reviews.starrating',
         'reviews.volume',
         'reviews.date_created',
-        'reviews.Review_id',
+        'reviews.venue_id',
         'reviews.user_id'
       )
-      .where('reviews.Review_id', Review_id)
+      .where('reviews.venue_id', venue_id)
       .join('totspots_users AS usr', 'reviews.user_id', 'usr.id')
       .groupBy('reviews.id', 'usr.id');
   },

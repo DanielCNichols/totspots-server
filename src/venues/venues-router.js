@@ -5,6 +5,7 @@ const VenuesRouter = express.Router();
 const jsonBodyParser = express.json();
 
 VenuesRouter.route('/:city/:state/:type').get((req, res) => {
+  console.log('hits router')
   VenuesService.getVenuesByCity(
     req.app.get('db'),
     req.params.city,

@@ -10,6 +10,8 @@ const jsonBodyParser = express.json();
 ReviewsRouter.route('/reviews/:venueId').get((req, res) => {
   ReviewsService.getReviewsByVenue(req.app.get('db'), req.params.venueId).then(
     reviews => {
+      console.log('we should see reviews');
+      console.log(reviews);
       res.json(reviews);
     }
   );
@@ -18,9 +20,9 @@ ReviewsRouter.route('/reviews/:venueId').get((req, res) => {
 ReviewsRouter.route('/:reviewId/votes').post(
   jsonBodyParser,
   (req, res, next) => {
-    console.log('handling votes on the server')
+    console.log('handling votes on the server');
     const { votestatus, review_id, user_id } = req.body;
-    const newVote = {votestatus, review_id, user_id};
+    const newVote = { votestatus, review_id, user_id };
     ReviewsService.postVotes(req.app.get('db'), newVote)
       .then(vote => {
         res.status(201).json(vote);
@@ -30,13 +32,15 @@ ReviewsRouter.route('/:reviewId/votes').post(
 );
 
 ReviewsRouter.route('/:venueId').post(jsonBodyParser, (req, res, next) => {
+  //Try to clean this up.
   const {
     venue_id,
     content,
     price,
     volume,
     starrating,
-    user_id
+    user_id,
+    amenities
   } = req.body;
   const newReview = {
     venue_id,
@@ -46,17 +50,21 @@ ReviewsRouter.route('/:venueId').post(jsonBodyParser, (req, res, next) => {
     starrating,
     user_id
   };
-  console.log(newReview)
-  // const venueAmenities = { venue_id, amenities };
 
   for (const [key, value] of Object.entries(newReview))
     if (value === null) {
       return res.status(400).json({ error: `Missing ${key} in request` });
     }
 
-  // ReviewsService.addAmenities(req.app.get('db'), amenities).then(amenities => {
-  //   res.status(201).json(amenities);
-  // });
+  console.log(amenities);
+
+  //iSSUE HERE WITH SYNTAX
+
+  amenities.forEach(amenity =>
+    ReviewsService.addAmenities(req.app.get('db'), amenity).then(amenity => {
+      res.status(201).json(amenity);
+    })
+  );
 
   ReviewsService.addReview(req.app.get('db'), newReview)
     .then(review => {
