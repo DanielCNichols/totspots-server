@@ -2,10 +2,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 
-const authorization = {
-  getUserName(db, user_name) {
+const AuthService = {
+  getUserName(db, username) {
+    console.log('Got username')
     return db('totspots_users')
-      .where({ user_name })
+      .where({ username })
       .first();
   },
 
@@ -14,19 +15,19 @@ const authorization = {
   },
 
   makeToken(sub, pay) {
-    return jwt.sign(payload, config.JWT_SECRET, {
-      subject,
-      algorithm: 'H256'
+    return jwt.sign(pay, config.JWT_SECRET, {
+      subject: sub,
+      algorithm: 'HS256'
     });
   },
 
-  checkToken(token) {
+  verifyJwt(token) {
     return jwt.verify(token, config.JWT_SECRET, {
-      algorithm: 'H256'
+      algorithms: ['HS256']
     });
   }
 };
 
 module.exports = 
-  authorization
+  AuthService
 ;

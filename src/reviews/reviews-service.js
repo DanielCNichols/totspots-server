@@ -15,8 +15,6 @@ const ReviewsService = {
       .insert(amenities)
       .into('amenities_venues')
       .returning('*')
-      .then(([amenities]) => amenities)
-      .then(console.log('Amenity added successfully!'));
   },
 
   serializeReview(newReview) {

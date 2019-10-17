@@ -1,11 +1,13 @@
 const express = require('express');
-const authRouter = express.Router();
 const jsonBodyParser = express.json();
-const AuthService = require('../middleware/auth-service');
+const AuthService = require('../middleware/AuthService');
 
-authRouter.post('/login', jsonBodyParser, (req, res, next) => {
-  const { userName, password } = req.body;
-  const user = { userName, password };
+const AuthRouter = express.Router();
+
+AuthRouter.post('/login', jsonBodyParser, (req, res, next) => {
+  const { username, password } = req.body;
+  console.log(username, password);
+  const user = { username, password };
 
   //if one of these is missing, forget it
 
@@ -16,28 +18,28 @@ authRouter.post('/login', jsonBodyParser, (req, res, next) => {
       });
     }
 
-  AuthService.getUserName(req.app.get('db'), user.userName)
+  AuthService.getUserName(req.app.get('db'), user.username)
     .then(dbuser => {
       if (!dbuser) {
         return res.status(400).json({
-          error: `Username or Password is incorrect`
+          error: `Username incorrect`
         });
       }
 
-      return AuthService.CheckPassword(dbuser.password, user.password).then(
+      return AuthService.checkPassword(user.password, dbuser.password).then(
         compareMatch => {
           if (!compareMatch) {
             return res.status(400).json({
-              error: `Username or Pasword is incorrect`
+              error: `Password is incorrect`
             });
           }
-          const sub = dbuser.userName;
+          const sub = dbuser.username;
           const payload = { user_id: dbuser.id };
-          res.send({ authToken: AuthService.createToken(sub, payload) });
+          res.send({ authToken: AuthService.makeToken(sub, payload) });
         }
       );
     })
     .catch(next);
 });
 
-module.export = authRouter;
+module.exports = AuthRouter;

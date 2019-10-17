@@ -1,8 +1,9 @@
-insert into totspots_totspots_users (id, first_name, last_name, email, Username, Password) values (1, 'Lowell', 'Worden', 'lworden0@addtoany.com', 'lworden0', 'Wgu4DxQfa5Hm');
-insert into totspots_users (id, first_name, last_name, email, Username, Password) values (2, 'Nevil', 'Kirsop', 'nkirsop1@goodreads.com', 'nkirsop1', 'uYf3f4xsL1L');
-insert into totspots_users (id, first_name, last_name, email, Username, Password) values (3, 'Bengt', 'Grigoroni', 'bgrigoroni2@kickstarter.com', 'bgrigoroni2', 'zDj7ZAFA1C9P');
-insert into totspots_users (id, first_name, last_name, email, Username, Password) values (4, 'Aline', 'Spedding', 'aspedding3@google.ca', 'aspedding3', 'QhROay');
-insert into totspots_users (id, first_name, last_name, email, Username, Password) values (5, 'Suki', 'Manass', 'smanass4@java.com', 'smanass4', '2NfIyw');
+
+insert into totspots_totspots_users (id, first_name, last_name, email, Username, Password) values (1, 'Lowell', 'Worden', 'lworden0@addtoany.com', 'lworden0', '$2a$10$2KfTHarfNVRn6g6xlWG6zeelFpytUiO.eZ.GhcDk5lu3UBG16MdVu');
+insert into totspots_users (id, first_name, last_name, email, Username, Password) values (2, 'Nevil', 'Kirsop', 'nkirsop1@goodreads.com', 'nkirsop1', '$2a$10$PIGLFbWinyn1qzfQv3HGVeO5mxWKRbs9.wtUk8ZOI2q8WQ7j5d8vC');
+insert into totspots_users (id, first_name, last_name, email, Username, Password) values (3, 'Bengt', 'Grigoroni', 'bgrigoroni2@kickstarter.com', 'bgrigoroni2', '$2a$10$.i7ZdEmRRxtCe7T/wd5xiep5HVmOup0NDGdl1XKY/w.dM/9yguCoW');
+insert into totspots_users (id, first_name, last_name, email, Username, Password) values (4, 'Aline', 'Spedding', 'aspedding3@google.ca', 'aspedding3', '$2a$10$NkaHqwt0mPQedFoGs4mtDe5kY/vVv9TBTOt2irAUg9fGsEpKYmcKK');
+insert into totspots_users (id, first_name, last_name, email, Username, Password) values (5, 'Suki', 'Manass', 'smanass4@java.com', 'smanass4', '$2a$10$3Pd.1KNx8QAk3B9z0jcktOmR5WFfFiDMGkGvMmu5.2tvZzvUZCwi.');
 insert into totspots_users (id, first_name, last_name, email, Username, Password) values (6, 'Hughie', 'Moreinu', 'hmoreinu5@com.com', 'hmoreinu5', 'erEl5ZI');
 insert into totspots_users (id, first_name, last_name, email, Username, Password) values (7, 'Dermot', 'Holson', 'dholson6@unblog.fr', 'dholson6', '3K290rropKiS');
 insert into totspots_users (id, first_name, last_name, email, Username, Password) values (8, 'Karlens', 'Czajkowski', 'kczajkowski7@furl.net', 'kczajkowski7', 'QXXSsmt7O');
@@ -16,5 +17,5 @@ insert into totspots_users (id, first_name, last_name, email, Username, Password
 insert into totspots_users (id, first_name, last_name, email, Username, Password) values (16, 'Tabor', 'Gullick', 'tgullickf@about.me', 'tgullickf', 'mhYzkiIi');
 insert into totspots_users (id, first_name, last_name, email, Username, Password) values (17, 'Curran', 'Ashe', 'casheg@goo.ne.jp', 'casheg', 'SpeWylz2');
 insert into totspots_users (id, first_name, last_name, email, Username, Password) values (18, 'Nora', 'Bonifazio', 'nbonifazioh@wikia.com', 'nbonifazioh', 'aGAwwH');
-insert into totspots_users (id, first_name, last_name, email, Username, Password) values (19, 'Lonnie', 'Guice', 'lguicei@oaic.gov.au', 'lguicei', '1ihp9mJdb');
+insert into totspots_users (id, first_name, last_name, email, Username, Password) values (19, 'Lonnie', 'Guice', 'lguicei@oaic.gov.au', 'lguicei', '1i*-hp9mJdb');
 insert into totspots_users (id, first_name, last_name, email, Username, Password) values (20, 'Emmy', 'Ben-Aharon', 'ebenaharonj@chron.com', 'ebenaharonj', 'XIjk8wnLg');

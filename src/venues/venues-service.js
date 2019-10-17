@@ -13,9 +13,9 @@ const VenuesService = {
         'totspots_venues.venue_type',
         'totspots_venues.id'
       )
-      .avg({avgPrice: 'reviews.price'})
-      .avg({avgRating: 'reviews.starrating'})
-      .avg({avgVolume: 'reviews.volume'})
+      .avg({ avgPrice: 'reviews.price' })
+      .avg({ avgRating: 'reviews.starrating' })
+      .avg({ avgVolume: 'reviews.volume' })
       .join('totspots_venues', 'reviews.venue_id', '=', 'totspots_venues.id')
       .where('totspots_venues.state', state)
       .andWhere('totspots_venues.city', city)
@@ -30,7 +30,6 @@ const VenuesService = {
         'totspots_venues.id'
       );
   },
-
 
   addVenue(db, newVenue) {
     return db
@@ -64,13 +63,39 @@ const VenuesService = {
         'reviews.date_created',
         'reviews.venue_id',
         'reviews.user_id',
-        'usr.first_name'
+        'usr.first_name',
+        'usr.last_name'
       )
       .where('reviews.venue_id', venue_id)
       .join('totspots_users AS usr', 'reviews.user_id', 'usr.id')
-      .groupBy('reviews.id', 'usr.id', 'usr.first_name');
+      .groupBy('reviews.id', 'usr.id', 'usr.first_name', 'usr.last_name');
+  },
+
+  getAmenitiesByVenue(db, venue_id) {
+    return db.from('totspots_venues')
+      .select('totspots_venues.venue_name', 'totspots_amenities.amenity_name')
+      .join(
+        'amenities_venues',
+        'totspots_venues.id',
+        '=',
+        'amenities_venues.venue'
+      )
+      .join(
+        'totspots_amenities',
+        'amenities_venues.amenity',
+        '=',
+        'totspots_amenities.id'
+      )
+      .where('totspots_venues.id', venue_id)
+      .groupBy('totspots_venues.venue_name', 'totspots_amenities.amenity_name');
+  },
+
+  getProfile(db, id) {
+    return db.from('totspots_users')
+      .select('*')
+      .where('totspots_users.id', id)
+      .first();
   }
 };
 
 module.exports = VenuesService;
-

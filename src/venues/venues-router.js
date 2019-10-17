@@ -3,9 +3,10 @@ const VenuesService = require('./venues-service');
 const path = require('path');
 const VenuesRouter = express.Router();
 const jsonBodyParser = express.json();
+const {requireAuth} = require('../middleware/jwt-auth')
 
 VenuesRouter.route('/:city/:state/:type').get((req, res) => {
-  console.log('hits router')
+  console.log('hits router');
   VenuesService.getVenuesByCity(
     req.app.get('db'),
     req.params.city,
@@ -24,10 +25,29 @@ VenuesRouter.route('/:venueId/reviews').get((req, res) => {
   );
 });
 
+VenuesRouter.route('/:venueId/amenities').get((req, res) => {
+  VenuesService.getAmenitiesByVenue(req.app.get('db'), req.params.venueId).then(
+    amenities => {
+      res.json(amenities);
+    }
+  );
+});
+
+VenuesRouter.route('/account')
+  // .all(requireAuth)
+  .get(requireAuth, (req, res, next) => {
+    VenuesService.getProfile(req.app.get('db'), req.user.id).then(profile => {
+      res.json(profile);
+    })
+    .catch(err => {
+      console.log('Account error', err)
+      next(err)
+  });
+})
+
 VenuesRouter.route('/addVenue').post(jsonBodyParser, (req, res, next) => {
   const { venue_name, venue_type, address, city, state, zipcode } = req.body;
   const newVenue = { venue_name, venue_type, address, city, state, zipcode };
-
 
   for (const [key, value] of Object.entries(newVenue))
     if (value === null) {

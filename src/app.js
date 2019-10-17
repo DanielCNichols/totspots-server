@@ -6,7 +6,7 @@ const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
 const VenuesRouter = require('./venues/venues-router');
 const app = express();
-const authRouter = require('./auth/auth-router')
+const AuthRouter = require('./auth/auth-router')
 const ReviewsRouter = require('./reviews/reviews-router')
 
 const morganOption = NODE_ENV === 'production';
@@ -15,9 +15,9 @@ app.use(morgan(morganOption));
 app.use(helmet());
 app.use(cors());
 
-// app.use('api/auth', authRouter)
 app.use('/api/venues', VenuesRouter)
 app.use('/api/reviews', ReviewsRouter)
+app.use('/api/auth', AuthRouter)
 
 app.use(function errorHandler(error, req, res, next) {
   let response;
