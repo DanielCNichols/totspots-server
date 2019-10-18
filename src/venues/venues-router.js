@@ -3,7 +3,7 @@ const VenuesService = require('./venues-service');
 const path = require('path');
 const VenuesRouter = express.Router();
 const jsonBodyParser = express.json();
-const {requireAuth} = require('../middleware/jwt-auth')
+const { requireAuth } = require('../middleware/jwt-auth');
 
 VenuesRouter.route('/:city/:state/:type').get((req, res) => {
   console.log('hits router');
@@ -34,16 +34,43 @@ VenuesRouter.route('/:venueId/amenities').get((req, res) => {
 });
 
 VenuesRouter.route('/account')
-  // .all(requireAuth)
+  .all(requireAuth)
   .get(requireAuth, (req, res, next) => {
-    VenuesService.getProfile(req.app.get('db'), req.user.id).then(profile => {
-      res.json(profile);
-    })
-    .catch(err => {
-      console.log('Account error', err)
-      next(err)
+    VenuesService.getProfile(req.app.get('db'), req.user.id)
+      .then(profile => {
+        res.json(profile);
+      })
+      .catch(err => {
+        console.log('Account error', err);
+        next(err);
+      });
   });
-})
+
+VenuesRouter.route('/favorites')
+  .all(requireAuth)
+  .get(requireAuth, (req, res, next) => {
+    VenuesService.getFavorites(req.app.get('db'), req.user.id)
+      .then(profile => {
+        res.json(profile);
+      })
+      .catch(err => {
+        console.log('Account error', err);
+        next(err);
+      });
+  });
+
+VenuesRouter.route('/userReviews')
+  .all(requireAuth)
+  .get(requireAuth, (req, res, next) => {
+    VenuesService.getUserReviews(req.app.get('db'), req.user.id)
+      .then(profile => {
+        res.json(profile);
+      })
+      .catch(err => {
+        console.log('Account error', err);
+        next(err);
+      });
+  });
 
 VenuesRouter.route('/addVenue').post(jsonBodyParser, (req, res, next) => {
   const { venue_name, venue_type, address, city, state, zipcode } = req.body;

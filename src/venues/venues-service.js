@@ -72,7 +72,8 @@ const VenuesService = {
   },
 
   getAmenitiesByVenue(db, venue_id) {
-    return db.from('totspots_venues')
+    return db
+      .from('totspots_venues')
       .select('totspots_venues.venue_name', 'totspots_amenities.amenity_name')
       .join(
         'amenities_venues',
@@ -91,11 +92,108 @@ const VenuesService = {
   },
 
   getProfile(db, id) {
-    return db.from('totspots_users')
-      .select('*')
+    return db
+      .from('totspots_users')
+      .select(
+        'totspots_users.username',
+        'totspots_users.first_name',
+        'totspots_users.last_name'
+      )
+      .join('reviews', 'totspots_users.id', '=', 'reviews.user_id')
       .where('totspots_users.id', id)
-      .first();
+      .first()
+      .groupBy(
+        'totspots_users.username',
+        'totspots_users.first_name',
+        'totspots_users.last_name'
+      );
+  },
+
+  getFavorites(db, id) {
+    return db
+      .from('totspots_users')
+      .select(
+        'totspots_venues.venue_name',
+        'totspots_venues.city',
+        'totspots_venues.state',
+        'totspots_venues.address',
+        'totspots_venues.zipcode',
+        'totspots_venues.venue_type',
+        'totspots_venues.id'
+      )
+      .join(
+        'users_favorites',
+        'totspots_users.id',
+        '=',
+        'users_favorites.user_id'
+      )
+      .join(
+        'totspots_venues',
+        'users_favorites.venue_id',
+        '=',
+        'totspots_venues.id'
+      )
+      .where('users_favorites.user_id', id)
+      .groupBy(
+        'totspots_venues.venue_name',
+        'totspots_venues.city',
+        'totspots_venues.state',
+        'totspots_venues.address',
+        'totspots_venues.zipcode',
+        'totspots_venues.venue_type',
+        'totspots_venues.id'
+      );
+  },
+
+  getUserReviews(db, id) {
+    return db
+      .from('reviews')
+      .select(
+        'reviews.id',
+        'reviews.content',
+        'reviews.price',
+        'reviews.starrating',
+        'reviews.volume',
+        'reviews.date_created',
+        'reviews.venue_id'
+      )
+      .join('totspots_users', 'reviews.user_id', '=', 'totspots_users.id')
+      .where('totspots_users.id', id)
+      .groupBy(
+        'reviews.id',
+        'reviews.content',
+        'reviews.price',
+        'reviews.starrating',
+        'reviews.volume',
+        'reviews.date_created',
+        'reviews.venue_id'
+      );
   }
 };
 
 module.exports = VenuesService;
+
+// getProfile(db, id) {
+//   return db
+//     .from('totspots_users')
+//     .select(
+//       'totspots_users.username',
+//       'totspots_users.first_name',
+//       'totspots_users.last_name',
+//       'reviews.price',
+//       'reviews.volume',
+//       'reviews.starrating',
+//       'reviews.content'
+//     )
+//     .join('reviews', 'totspots_users.id', '=', 'reviews.user_id')
+//     .where('totspots_users.id', id)
+//     .groupBy(
+//       'totspots_users.username',
+//       'totspots_users.first_name',
+//       'totspots_users.last_name',
+//       'reviews.price',
+//       'reviews.volume',
+//       'reviews.starrating',
+//       'reviews.content'
+//     );
+// }
