@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS votes;
 
 CREATE TABLE votes (
   id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES totspots_users(id),
-  review_id INTEGER REFERENCES reviews(id),
-  voteStatus NUMERIC NOT NULL
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  review_id INTEGER REFERENCES reviews(id) ON DELETE CASCADE,
+  voteStatus BOOLEAN DEFAULT NULL
 );

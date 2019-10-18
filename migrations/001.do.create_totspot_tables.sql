@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS totspots_users;
+DROP TABLE IF EXISTS users;
 
-CREATE TABLE totspots_users(
+CREATE TABLE users(
 	id SERIAL PRIMARY KEY,
 	first_name TEXT NOT NULL, 
 	last_name TEXT NOT NULL, 
@@ -11,21 +11,23 @@ CREATE TABLE totspots_users(
 	password TEXT NOT NULL 
 );
 
-DROP TABLE IF EXISTS totspots_venues;
+DROP TABLE IF EXISTS venues;
 
-CREATE TABLE totspots_venues(
+CREATE TABLE venues(
 	id SERIAL PRIMARY KEY,
 	venue_name TEXT NOT NULL,
 	venue_type TEXT NOT NULL,
 	address TEXT NOT NULL,
 	city TEXT NOT NULL,
-	State TEXT NOT NULL,
-	zipcode NUMERIC NOT NULL
+	state TEXT NOT NULL,
+	zipcode NUMERIC,
+	url text,
+	phone NUMERIC
 );
 
-DROP TABLE IF EXISTS totspots_amenities;
+DROP TABLE IF EXISTS amenities;
 
-CREATE TABLE totspots_amenities(
+CREATE TABLE amenities(
 	id SERIAL PRIMARY KEY, 
 	amenity_name TEXT NOT NULL
 );

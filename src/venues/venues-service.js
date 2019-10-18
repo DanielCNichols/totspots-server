@@ -3,38 +3,38 @@ const xss = require('xss');
 const VenuesService = {
   getVenuesByCity(db, city, state, type) {
     return db
-      .from('reviews')
+      .from('venues')
       .select(
-        'totspots_venues.venue_name',
-        'totspots_venues.city',
-        'totspots_venues.state',
-        'totspots_venues.address',
-        'totspots_venues.zipcode',
-        'totspots_venues.venue_type',
-        'totspots_venues.id'
+        'venues.venue_name',
+        'venues.city',
+        'venues.state',
+        'venues.address',
+        'venues.zipcode',
+        'venues.venue_type',
+        'venues.id'
       )
       .avg({ avgPrice: 'reviews.price' })
       .avg({ avgRating: 'reviews.starrating' })
       .avg({ avgVolume: 'reviews.volume' })
-      .join('totspots_venues', 'reviews.venue_id', '=', 'totspots_venues.id')
-      .where('totspots_venues.state', state)
-      .andWhere('totspots_venues.city', city)
-      .andWhere('totspots_venues.venue_type', type)
+      .join('reviews', 'venues.id', '=', 'reviews.venue_id')
+      .where('venues.state', state)
+      .andWhere('venues.city', city)
+      .andWhere('venues.venue_type', type)
       .groupBy(
-        'totspots_venues.venue_name',
-        'totspots_venues.city',
-        'totspots_venues.state',
-        'totspots_venues.address',
-        'totspots_venues.zipcode',
-        'totspots_venues.venue_type',
-        'totspots_venues.id'
+        'venues.venue_name',
+        'venues.city',
+        'venues.state',
+        'venues.address',
+        'venues.zipcode',
+        'venues.venue_type',
+        'venues.id'
       );
   },
 
   addVenue(db, newVenue) {
     return db
       .insert(newVenue)
-      .into('totspots_venues')
+      .into('venues')
       .returning('*')
       .then(([venue]) => venue);
   },
@@ -67,81 +67,81 @@ const VenuesService = {
         'usr.last_name'
       )
       .where('reviews.venue_id', venue_id)
-      .join('totspots_users AS usr', 'reviews.user_id', 'usr.id')
+      .join('users AS usr', 'reviews.user_id', 'usr.id')
       .groupBy('reviews.id', 'usr.id', 'usr.first_name', 'usr.last_name');
   },
 
   getAmenitiesByVenue(db, venue_id) {
     return db
-      .from('totspots_venues')
-      .select('totspots_venues.venue_name', 'totspots_amenities.amenity_name')
+      .from('venues')
+      .select('venues.venue_name', 'amenities.amenity_name')
       .join(
         'amenities_venues',
-        'totspots_venues.id',
+        'venues.id',
         '=',
         'amenities_venues.venue'
       )
       .join(
-        'totspots_amenities',
+        'amenities',
         'amenities_venues.amenity',
         '=',
-        'totspots_amenities.id'
+        'amenities.id'
       )
-      .where('totspots_venues.id', venue_id)
-      .groupBy('totspots_venues.venue_name', 'totspots_amenities.amenity_name');
+      .where('venues.id', venue_id)
+      .groupBy('venues.venue_name', 'amenities.amenity_name');
   },
 
   getProfile(db, id) {
     return db
-      .from('totspots_users')
+      .from('users')
       .select(
-        'totspots_users.username',
-        'totspots_users.first_name',
-        'totspots_users.last_name'
+        'users.username',
+        'users.first_name',
+        'users.last_name'
       )
-      .join('reviews', 'totspots_users.id', '=', 'reviews.user_id')
-      .where('totspots_users.id', id)
+      .join('reviews', 'users.id', '=', 'reviews.user_id')
+      .where('users.id', id)
       .first()
       .groupBy(
-        'totspots_users.username',
-        'totspots_users.first_name',
-        'totspots_users.last_name'
+        'users.username',
+        'users.first_name',
+        'users.last_name'
       );
   },
 
   getFavorites(db, id) {
     return db
-      .from('totspots_users')
+      .from('users')
       .select(
-        'totspots_venues.venue_name',
-        'totspots_venues.city',
-        'totspots_venues.state',
-        'totspots_venues.address',
-        'totspots_venues.zipcode',
-        'totspots_venues.venue_type',
-        'totspots_venues.id'
+        'venues.venue_name',
+        'venues.city',
+        'venues.state',
+        'venues.address',
+        'venues.zipcode',
+        'venues.venue_type',
+        'venues.id'
       )
       .join(
         'users_favorites',
-        'totspots_users.id',
+        'users.id',
         '=',
         'users_favorites.user_id'
       )
       .join(
-        'totspots_venues',
+        'venues',
         'users_favorites.venue_id',
         '=',
-        'totspots_venues.id'
+        'venues.id'
       )
       .where('users_favorites.user_id', id)
       .groupBy(
-        'totspots_venues.venue_name',
-        'totspots_venues.city',
-        'totspots_venues.state',
-        'totspots_venues.address',
-        'totspots_venues.zipcode',
-        'totspots_venues.venue_type',
-        'totspots_venues.id'
+        'venues.venue_name',
+        'venues.city',
+        'venues.state',
+        'venues.address',
+        'venues.zipcode',
+        'venues.venue_type',
+        'venues.id'
       );
   },
 
@@ -157,8 +157,8 @@ const VenuesService = {
         'reviews.date_created',
         'reviews.venue_id'
       )
-      .join('totspots_users', 'reviews.user_id', '=', 'totspots_users.id')
-      .where('totspots_users.id', id)
+      .join('users', 'reviews.user_id', '=', 'users.id')
+      .where('users.id', id)
       .groupBy(
         'reviews.id',
         'reviews.content',

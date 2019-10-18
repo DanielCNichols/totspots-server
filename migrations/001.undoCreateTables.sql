@@ -1,3 +1,3 @@
-DROP TABLE IF EXISTS totspots_venues;
-DROP TABLE IF EXISTS totspots_users;
-DROP TABLE IF EXISTS totspots_amenities;
+DROP TABLE IF EXISTS venues;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS amenities;

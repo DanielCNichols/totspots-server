@@ -22,7 +22,7 @@ AuthRouter.post('/login', jsonBodyParser, (req, res, next) => {
     .then(dbuser => {
       if (!dbuser) {
         return res.status(400).json({
-          error: `Username incorrect`
+          error: 'Incorrect Credentials'
         });
       }
 
@@ -30,7 +30,7 @@ AuthRouter.post('/login', jsonBodyParser, (req, res, next) => {
         compareMatch => {
           if (!compareMatch) {
             return res.status(400).json({
-              error: `Password is incorrect`
+              error: 'Incorrect Credentials'
             });
           }
           const sub = dbuser.username;

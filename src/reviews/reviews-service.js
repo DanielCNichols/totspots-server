@@ -14,7 +14,7 @@ const ReviewsService = {
     return db
       .insert(amenities)
       .into('amenities_venues')
-      .returning('*')
+      .returning('*');
   },
 
   serializeReview(newReview) {
@@ -43,7 +43,7 @@ const ReviewsService = {
         'reviews.user_id'
       )
       .where('reviews.venue_id', venue_id)
-      .join('totspots_users AS usr', 'reviews.user_id', 'usr.id')
+      .join('users AS usr', 'reviews.user_id', 'usr.id')
       .groupBy('reviews.id', 'usr.id');
   },
 
@@ -54,6 +54,18 @@ const ReviewsService = {
       .into('votes')
       .returning('*')
       .then(([vote]) => vote);
+  },
+
+  deleteReview(db, id) {
+    return db('reviews')
+      .where({ id })
+      .delete();
+  },
+
+  updateReview(db, id, updatedReview) {
+    return db('reviews')
+      .where({ id })
+      .update(updatedReview);
   }
 };
 

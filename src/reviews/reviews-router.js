@@ -7,16 +7,16 @@ const ReviewsRouter = express.Router();
 const jsonBodyParser = express.json();
 
 //Only need to get the review for the current displayed venues....?
-//This works... but only displays for one venue at a time. Works, but maybe not the best.
-ReviewsRouter.route('/reviews/:venueId').get((req, res) => {
-  ReviewsService.getReviewsByVenue(req.app.get('db'), req.params.venueId).then(
-    reviews => {
-      console.log('we should see reviews');
-      console.log(reviews);
-      res.json(reviews);
-    }
-  );
-});
+// //This works... but only displays for one venue at a time. Works, but maybe not the best.
+// ReviewsRouter.route('/reviews/:venueId').get((req, res) => {
+//   ReviewsService.getReviewsByVenue(req.app.get('db'), req.params.venueId).then(
+//     reviews => {
+//       console.log('we should see reviews');
+//       console.log(reviews);
+//       res.json(reviews);
+//     }
+//   );
+// });
 
 ReviewsRouter.route('/:reviewId/votes').post(
   jsonBodyParser,
@@ -62,7 +62,6 @@ ReviewsRouter.route('/:venueId')
 
     console.log(amenities);
 
-    //iSSUE HERE WITH SYNTAX
 
     ReviewsService.addReview(req.app.get('db'), newReview).then(review => {
       ReviewsService.addAmenities(req.app.get('db'), amenities)
@@ -74,6 +73,34 @@ ReviewsRouter.route('/:venueId')
         })
         .catch(next);
     });
+  });
+
+ReviewsRouter.route('/:reviewId')
+  .delete((req, res, next) => {
+    console.log('hitting delete route');
+    ReviewsService.deleteReview(req.app.get('db'), req.params.reviewId)
+      .then(numRowsAffected => {
+        res.status(204).end();
+      })
+      .catch(next);
+  })
+  .patch(jsonBodyParser, (req, res, next) => {
+    const { content, starrating, price, volume} = req.body;
+    const updatedReview = { content, starrating, price, volume };
+
+    const numberOfValues = Object.values(updatedReview).filter(Boolean).length;
+    if (numberOfValues === 0) {
+      return res.status(400).json({
+        error: { message: `Request must contain content, rating, price, or volume` }
+      });
+    }
+
+    ReviewsService
+      .updateReview(req.app.get('db'), req.params.reviewId, updatedReview)
+      .then(numRowsAffected => {
+        res.status(204).end();
+      })
+      .catch(next);
   });
 
 module.exports = ReviewsRouter;
