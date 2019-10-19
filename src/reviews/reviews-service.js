@@ -2,6 +2,14 @@
 const xss = require('xss');
 
 const ReviewsService = {
+  getReviewsById(db, id) {
+    return db
+      .from('reviews')
+      .select('*')
+      .where('reviews.id', id)
+      .first();
+  },
+
   addReview(db, newReview) {
     return db
       .insert(newReview)

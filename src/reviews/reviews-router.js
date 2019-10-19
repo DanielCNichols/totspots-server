@@ -62,7 +62,6 @@ ReviewsRouter.route('/:venueId')
 
     console.log(amenities);
 
-
     ReviewsService.addReview(req.app.get('db'), newReview).then(review => {
       ReviewsService.addAmenities(req.app.get('db'), amenities)
         .then(amenity => {
@@ -76,6 +75,14 @@ ReviewsRouter.route('/:venueId')
   });
 
 ReviewsRouter.route('/:reviewId')
+  .get((req, res, next) => {
+    ReviewsService.getReviewsById(req.app.get('db'), req.params.reviewId).then(
+      reviews => {
+        res.json(reviews);
+      }
+    );
+  })
+
   .delete((req, res, next) => {
     console.log('hitting delete route');
     ReviewsService.deleteReview(req.app.get('db'), req.params.reviewId)
@@ -85,18 +92,23 @@ ReviewsRouter.route('/:reviewId')
       .catch(next);
   })
   .patch(jsonBodyParser, (req, res, next) => {
-    const { content, starrating, price, volume} = req.body;
+    const { content, starrating, price, volume } = req.body;
     const updatedReview = { content, starrating, price, volume };
-
+    console.log(updatedReview)
     const numberOfValues = Object.values(updatedReview).filter(Boolean).length;
     if (numberOfValues === 0) {
       return res.status(400).json({
-        error: { message: `Request must contain content, rating, price, or volume` }
+        error: {
+          message: `Request must contain content, rating, price, or volume`
+        }
       });
     }
 
-    ReviewsService
-      .updateReview(req.app.get('db'), req.params.reviewId, updatedReview)
+    ReviewsService.updateReview(
+      req.app.get('db'),
+      req.params.reviewId,
+      updatedReview
+    )
       .then(numRowsAffected => {
         res.status(204).end();
       })
