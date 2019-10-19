@@ -39,6 +39,22 @@ const VenuesService = {
       .then(([venue]) => venue);
   },
 
+  addFavorite(db, newFavorite) {
+    return db
+      .insert(newFavorite)
+      .into('users_favorites')
+      .returning('*')
+      .then(([favorite]) => favorite);
+  },
+
+  deleteFavorite(db, delFav) {
+    console.log(delFav.user_id);
+    return db('users_favorites')
+      .where('users_favorites.user_id', delFav.user_id)
+      .andWhere('users_favorites.venue_id', delFav.venue_id)
+      .delete();
+  },
+
   serializeVenue(newVenue) {
     return {
       id: newVenue.id,
@@ -75,18 +91,8 @@ const VenuesService = {
     return db
       .from('venues')
       .select('venues.venue_name', 'amenities.amenity_name')
-      .join(
-        'amenities_venues',
-        'venues.id',
-        '=',
-        'amenities_venues.venue'
-      )
-      .join(
-        'amenities',
-        'amenities_venues.amenity',
-        '=',
-        'amenities.id'
-      )
+      .join('amenities_venues', 'venues.id', '=', 'amenities_venues.venue')
+      .join('amenities', 'amenities_venues.amenity', '=', 'amenities.id')
       .where('venues.id', venue_id)
       .groupBy('venues.venue_name', 'amenities.amenity_name');
   },
@@ -94,19 +100,11 @@ const VenuesService = {
   getProfile(db, id) {
     return db
       .from('users')
-      .select(
-        'users.username',
-        'users.first_name',
-        'users.last_name'
-      )
+      .select('users.username', 'users.first_name', 'users.last_name')
       .join('reviews', 'users.id', '=', 'reviews.user_id')
       .where('users.id', id)
       .first()
-      .groupBy(
-        'users.username',
-        'users.first_name',
-        'users.last_name'
-      );
+      .groupBy('users.username', 'users.first_name', 'users.last_name');
   },
 
   getFavorites(db, id) {
@@ -121,18 +119,8 @@ const VenuesService = {
         'venues.venue_type',
         'venues.id'
       )
-      .join(
-        'users_favorites',
-        'users.id',
-        '=',
-        'users_favorites.user_id'
-      )
-      .join(
-        'venues',
-        'users_favorites.venue_id',
-        '=',
-        'venues.id'
-      )
+      .join('users_favorites', 'users.id', '=', 'users_favorites.user_id')
+      .join('venues', 'users_favorites.venue_id', '=', 'venues.id')
       .where('users_favorites.user_id', id)
       .groupBy(
         'venues.venue_name',

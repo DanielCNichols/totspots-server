@@ -48,7 +48,7 @@ VenuesRouter.route('/account')
   });
 
 VenuesRouter.route('/favorites')
-  .all(requireAuth)
+  // .all(requireAuth)
   .get(requireAuth, (req, res, next) => {
     VenuesService.getFavorites(req.app.get('db'), req.user.id)
       .then(profile => {
@@ -58,6 +58,30 @@ VenuesRouter.route('/favorites')
         console.log('Account error', err);
         next(err);
       });
+  })
+  .post(jsonBodyParser, (req, res, next) => {
+    console.log('WE ARE CONSOLE LOGGING THE BODY HERE');
+    console.log(req.body);
+    const { user_id, venue_id } = req.body;
+    const newFavorite = { user_id, venue_id };
+    VenuesService.addFavorite(req.app.get('db'), newFavorite)
+      .then(favorite => {
+        console.log('eyyyyyyy!');
+        res.json(favorite);
+      })
+      .catch(err => {
+        console.log('Favorties error', err);
+        next(err);
+      });
+  })
+  .delete(jsonBodyParser, (req, res, next) => {
+    const { user_id, venue_id } = req.body;
+    const delFav = { user_id, venue_id };
+    VenuesService.deleteFavorite(req.app.get('db'), delFav)
+      .then(numRowsAffected => {
+        res.status(204).end();
+      })
+      .catch(next);
   });
 
 VenuesRouter.route('/userReviews')
