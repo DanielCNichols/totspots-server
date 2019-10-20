@@ -101,7 +101,7 @@ const VenuesService = {
     return db
       .from('users')
       .select('users.username', 'users.first_name', 'users.last_name')
-      .join('reviews', 'users.id', '=', 'reviews.user_id')
+      // .join('reviews', 'users.id', '=', 'reviews.user_id')
       .where('users.id', id)
       .first()
       .groupBy('users.username', 'users.first_name', 'users.last_name');

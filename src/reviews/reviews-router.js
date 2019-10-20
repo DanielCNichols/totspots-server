@@ -18,23 +18,32 @@ const jsonBodyParser = express.json();
 //   );
 // });
 
+
+//CANT SEND THE USER ID LIKE THIS!
 ReviewsRouter.route('/:reviewId/votes').post(
-  jsonBodyParser,
+  requireAuth, jsonBodyParser,
   (req, res, next) => {
     console.log('handling votes on the server');
-    const { votestatus, review_id, user_id } = req.body;
-    const newVote = { votestatus, review_id, user_id };
+    const { votestatus, review_id,} = req.body;
+    const newVote = { votestatus, review_id};
+
+    //Do ur checkz
+
+    newVote.user_id = req.user.id;
     ReviewsService.postVotes(req.app.get('db'), newVote)
       .then(vote => {
         res.status(201).json(vote);
       })
       .catch(next);
   }
+
+  //Patch and get forthcoming.... get shouldn't be protected...
 );
 
+//CANT SEND THE USER ID LIKE THIS!!!
 ReviewsRouter.route('/:venueId')
   // .all(requireAuth)
-  .post(jsonBodyParser, (req, res, next) => {
+  .post(requireAuth, jsonBodyParser, (req, res, next) => {
     console.log('reviews/venueId');
     //Try to clean this up.
     const {
@@ -43,7 +52,6 @@ ReviewsRouter.route('/:venueId')
       price,
       volume,
       starrating,
-      user_id,
       amenities
     } = req.body;
     const newReview = {
@@ -52,13 +60,14 @@ ReviewsRouter.route('/:venueId')
       price,
       volume,
       starrating,
-      user_id
     };
 
     for (const [key, value] of Object.entries(newReview))
       if (value === null) {
         return res.status(400).json({ error: `Missing ${key} in request` });
       }
+
+      newReview.user_id = req.user.id;
 
     console.log(amenities);
 
@@ -75,6 +84,7 @@ ReviewsRouter.route('/:venueId')
   });
 
 ReviewsRouter.route('/:reviewId')
+//THIS IS SENDING THE USER_ID WITH THE REVIEW (TO BE EDITED)... ???
   .get((req, res, next) => {
     ReviewsService.getReviewsById(req.app.get('db'), req.params.reviewId).then(
       reviews => {
@@ -116,6 +126,6 @@ ReviewsRouter.route('/:reviewId')
   });
 
 
-  
+
 
 module.exports = ReviewsRouter;

@@ -35,7 +35,6 @@ VenuesRouter.route('/:venueId/amenities').get((req, res) => {
 });
 
 VenuesRouter.route('/account')
-  .all(requireAuth)
   .get(requireAuth, (req, res, next) => {
     VenuesService.getProfile(req.app.get('db'), req.user.id)
       .then(profile => {
@@ -46,6 +45,8 @@ VenuesRouter.route('/account')
         next(err);
       });
   });
+
+
 
 VenuesRouter.route('/favorites')
   // .all(requireAuth)
@@ -59,11 +60,18 @@ VenuesRouter.route('/favorites')
         next(err);
       });
   })
-  .post(jsonBodyParser, (req, res, next) => {
+
+  .post(requireAuth, jsonBodyParser, (req, res, next) => {
     console.log('WE ARE CONSOLE LOGGING THE BODY HERE');
     console.log(req.body);
-    const { user_id, venue_id } = req.body;
-    const newFavorite = { user_id, venue_id };
+    const { venue_id } = req.body;
+    const newFavorite = { venue_id };
+
+    //check for validation here
+
+    //add user id from authtoken
+
+    newFavorite.user_id = req.user.id;
     VenuesService.addFavorite(req.app.get('db'), newFavorite)
       .then(favorite => {
         console.log('eyyyyyyy!');
@@ -74,9 +82,15 @@ VenuesRouter.route('/favorites')
         next(err);
       });
   })
-  .delete(jsonBodyParser, (req, res, next) => {
-    const { user_id, venue_id } = req.body;
-    const delFav = { user_id, venue_id };
+  .delete(requireAuth, jsonBodyParser, (req, res, next) => {
+    const { venue_id } = req.body;
+    const delFav = {venue_id };
+
+    //MACHEN SOME VALIDATION HERE!
+
+    //SET THE user...
+
+    delFav.user_id = req.user.id;
     VenuesService.deleteFavorite(req.app.get('db'), delFav)
       .then(numRowsAffected => {
         res.status(204).end();
@@ -97,7 +111,9 @@ VenuesRouter.route('/userReviews')
       });
   });
 
-VenuesRouter.route('/addVenue').post(jsonBodyParser, (req, res, next) => {
+
+
+VenuesRouter.route('/addVenue').post(requireAuth, jsonBodyParser, (req, res, next) => {
   let newvenue;
   const {
     venue_name,
@@ -110,18 +126,19 @@ VenuesRouter.route('/addVenue').post(jsonBodyParser, (req, res, next) => {
     price,
     volume,
     starrating,
-    user_id,
     amenities
   } = req.body;
   console.log(amenities);
   const newVenue = { venue_name, venue_type, address, city, state, zipcode };
-  const newReview = { content, price, volume, starrating, user_id };
+  const newReview = { content, price, volume, starrating};
   const newAmenities = amenities;
 
   for (const [key, value] of Object.entries(newVenue))
     if (value === null) {
       return res.status(400).json({ error: `Missing ${key} in request` });
     }
+
+
   VenuesService.addVenue(req.app.get('db'), newVenue).then(venue => {
     console.log(venue);
     // res
@@ -134,8 +151,12 @@ VenuesRouter.route('/addVenue').post(jsonBodyParser, (req, res, next) => {
       price,
       volume,
       starrating,
-      user_id
     };
+
+    // DO A CHECK HRERE
+
+    //set the id
+    newReview.user_id = req.user.id;
     ReviewsService.addReview(req.app.get('db'), newReview).then(review => {
       console.log(`THIS IS VENUE AT 116 ${venue}`);
     });
@@ -145,20 +166,6 @@ VenuesRouter.route('/addVenue').post(jsonBodyParser, (req, res, next) => {
     );
   });
 });
-// .then(venue => {
-//   console.log(venue)
-//   newAmenities.map(amenity => (amenity.venue_id = venue.id));
-//   ReviewsService.addAmenities(req.app.get('db'), newAmenities).then(venue =>
 
-//             // res
-//             //   .status(201)
-//             //   .location(path.posix.join(req.originalUrl, `/${review.id}`))
-//             //   .json(ReviewsService.serializeReview(review));
-//           })
-//           .catch(next);
-//     //   });
-//     // })
-//     .catch(next);
-// // });
 
 module.exports = VenuesRouter;
