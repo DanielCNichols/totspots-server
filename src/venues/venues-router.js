@@ -18,13 +18,6 @@ VenuesRouter.route('/:city/:state/:type').get((req, res) => {
   });
 });
 
-VenuesRouter.route('/:venueId/reviews').get((req, res) => {
-  VenuesService.getReviewsByVenue(req.app.get('db'), req.params.venueId).then(
-    reviews => {
-      res.json(reviews);
-    }
-  );
-});
 
 VenuesRouter.route('/:venueId/amenities').get((req, res) => {
   VenuesService.getAmenitiesByVenue(req.app.get('db'), req.params.venueId).then(
@@ -34,70 +27,72 @@ VenuesRouter.route('/:venueId/amenities').get((req, res) => {
   );
 });
 
-VenuesRouter.route('/account')
-  .get(requireAuth, (req, res, next) => {
-    VenuesService.getProfile(req.app.get('db'), req.user.id)
-      .then(profile => {
-        res.json(profile);
-      })
-      .catch(err => {
-        console.log('Account error', err);
-        next(err);
-      });
-  });
+// VenuesRouter.route('/account')
+//   .get(requireAuth, (req, res, next) => {
+//     VenuesService.getProfile(req.app.get('db'), req.user.id)
+//       .then(profile => {
+//         res.json(profile);
+//       })
+//       .catch(err => {
+//         console.log('Account error', err);
+//         next(err);
+//       });
+//   });
 
 
 
-VenuesRouter.route('/favorites')
-  // .all(requireAuth)
-  .get(requireAuth, (req, res, next) => {
-    VenuesService.getFavorites(req.app.get('db'), req.user.id)
-      .then(profile => {
-        res.json(profile);
-      })
-      .catch(err => {
-        console.log('Account error', err);
-        next(err);
-      });
-  })
+// //This endpoint handles all of the action dealing with users_favorites, and requires Authorization.
+// VenuesRouter.route('/favorites')
+//   // .all(requireAuth)
+//   .get(requireAuth, (req, res, next) => {
+//     VenuesService.getFavorites(req.app.get('db'), req.user.id)
+//       .then(profile => {
+//         res.json(profile);
+//       })
+//       .catch(err => {
+//         console.log('Account error', err);
+//         next(err);
+//       });
+//   })
+//   .post(requireAuth, jsonBodyParser, (req, res, next) => {
+//     console.log('WE ARE CONSOLE LOGGING THE BODY HERE');
+//     console.log(req.body);
+//     const { venue_id } = req.body;
+//     const newFavorite = { venue_id };
 
-  .post(requireAuth, jsonBodyParser, (req, res, next) => {
-    console.log('WE ARE CONSOLE LOGGING THE BODY HERE');
-    console.log(req.body);
-    const { venue_id } = req.body;
-    const newFavorite = { venue_id };
+//     //check for validation here
 
-    //check for validation here
+//     //add user id from authtoken
 
-    //add user id from authtoken
+//     newFavorite.user_id = req.user.id;
+//     VenuesService.addFavorite(req.app.get('db'), newFavorite)
+//       .then(favorite => {
+//         console.log('eyyyyyyy!');
+//         res.json(favorite);
+//       })
+//       .catch(err => {
+//         console.log('Favorties error', err);
+//         next(err);
+//       });
+//   })
+//   .delete(requireAuth, jsonBodyParser, (req, res, next) => {
+//     const { venue_id } = req.body;
+//     const delFav = {venue_id };
 
-    newFavorite.user_id = req.user.id;
-    VenuesService.addFavorite(req.app.get('db'), newFavorite)
-      .then(favorite => {
-        console.log('eyyyyyyy!');
-        res.json(favorite);
-      })
-      .catch(err => {
-        console.log('Favorties error', err);
-        next(err);
-      });
-  })
-  .delete(requireAuth, jsonBodyParser, (req, res, next) => {
-    const { venue_id } = req.body;
-    const delFav = {venue_id };
+//     //MACHEN SOME VALIDATION HERE!
 
-    //MACHEN SOME VALIDATION HERE!
+//     //SET THE user...
 
-    //SET THE user...
+//     delFav.user_id = req.user.id;
+//     VenuesService.deleteFavorite(req.app.get('db'), delFav)
+//       .then(numRowsAffected => {
+//         res.status(204).end();
+//       })
+//       .catch(next);
+//   });
 
-    delFav.user_id = req.user.id;
-    VenuesService.deleteFavorite(req.app.get('db'), delFav)
-      .then(numRowsAffected => {
-        res.status(204).end();
-      })
-      .catch(next);
-  });
 
+  //WE NEED TO MOVE THIS SOMEHOW
 VenuesRouter.route('/userReviews')
   .all(requireAuth)
   .get(requireAuth, (req, res, next) => {

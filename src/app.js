@@ -8,7 +8,7 @@ const VenuesRouter = require('./venues/venues-router');
 const app = express();
 const AuthRouter = require('./auth/auth-router')
 const ReviewsRouter = require('./reviews/reviews-router')
-
+const UserRouter = require('./user/UserRouter')
 const morganOption = NODE_ENV === 'production';
 
 app.use(morgan(morganOption));
@@ -18,6 +18,7 @@ app.use(cors());
 app.use('/api/venues', VenuesRouter)
 app.use('/api/reviews', ReviewsRouter)
 app.use('/api/auth', AuthRouter)
+app.use('/api/users', UserRouter)
 
 app.use(function errorHandler(error, req, res, next) {
   let response;

@@ -48,12 +48,40 @@ const ReviewsService = {
         'reviews.volume',
         'reviews.date_created',
         'reviews.venue_id',
-        'reviews.user_id'
+        'reviews.user_id',
+        'usr.first_name',
+        'usr.last_name'
       )
       .where('reviews.venue_id', venue_id)
       .join('users AS usr', 'reviews.user_id', 'usr.id')
-      .groupBy('reviews.id', 'usr.id');
+      .groupBy('reviews.id', 'usr.id', 'usr.first_name', 'usr.last_name');
   },
+
+  getUserReviews(db, id) {
+    return db
+      .from('reviews')
+      .select(
+        'reviews.id',
+        'reviews.content',
+        'reviews.price',
+        'reviews.starrating',
+        'reviews.volume',
+        'reviews.date_created',
+        'reviews.venue_id'
+      )
+      .join('users', 'reviews.user_id', '=', 'users.id')
+      .where('users.id', id)
+      .groupBy(
+        'reviews.id',
+        'reviews.content',
+        'reviews.price',
+        'reviews.starrating',
+        'reviews.volume',
+        'reviews.date_created',
+        'reviews.venue_id'
+      );
+  },
+
 
   postVotes(db, newVote) {
     console.log('posting votes');

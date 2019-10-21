@@ -6,20 +6,17 @@ const { requireAuth } = require('../middleware/jwt-auth');
 const ReviewsRouter = express.Router();
 const jsonBodyParser = express.json();
 
-//Only need to get the review for the current displayed venues....?
-// //This works... but only displays for one venue at a time. Works, but maybe not the best.
-// ReviewsRouter.route('/reviews/:venueId').get((req, res) => {
-//   ReviewsService.getReviewsByVenue(req.app.get('db'), req.params.venueId).then(
-//     reviews => {
-//       console.log('we should see reviews');
-//       console.log(reviews);
-//       res.json(reviews);
-//     }
-//   );
-// });
 
 
-//CANT SEND THE USER ID LIKE THIS!
+//Get reviewsBy venue
+ReviewsRouter.route('/:venueId/').get((req, res) => {
+  ReviewsService.getReviewsByVenue(req.app.get('db'), req.params.venueId).then(
+    reviews => {
+      res.json(reviews);
+    }
+  );
+});
+
 ReviewsRouter.route('/:reviewId/votes').post(
   requireAuth, jsonBodyParser,
   (req, res, next) => {
@@ -36,11 +33,22 @@ ReviewsRouter.route('/:reviewId/votes').post(
       })
       .catch(next);
   }
-
-  //Patch and get forthcoming.... get shouldn't be protected...
 );
 
-//CANT SEND THE USER ID LIKE THIS!!!
+
+ReviewsRouter.route('/userReviews')
+  .all(requireAuth)
+  .get(requireAuth, (req, res, next) => {
+    ReviewsService.getUserReviews(req.app.get('db'), req.user.id)
+      .then(profile => {
+        res.json(profile);
+      })
+      .catch(err => {
+        console.log('Account error', err);
+        next(err);
+      });
+  });
+
 ReviewsRouter.route('/:venueId')
   // .all(requireAuth)
   .post(requireAuth, jsonBodyParser, (req, res, next) => {
@@ -84,7 +92,6 @@ ReviewsRouter.route('/:venueId')
   });
 
 ReviewsRouter.route('/:reviewId')
-//THIS IS SENDING THE USER_ID WITH THE REVIEW (TO BE EDITED)... ???
   .get((req, res, next) => {
     ReviewsService.getReviewsById(req.app.get('db'), req.params.reviewId).then(
       reviews => {
