@@ -1,6 +1,13 @@
-const xss = require('xss');
 
 const VenuesService = {
+  getVenueById(db, id) {
+    return db
+      .from('venues')
+      .select('*')
+      .where('venues.id', id)
+      .first();
+  },
+
   getVenuesByCity(db, city, state, type) {
     return db
       .from('venues')
@@ -10,6 +17,8 @@ const VenuesService = {
         'venues.state',
         'venues.address',
         'venues.zipcode',
+        'venues.phone',
+        'venues.url',
         'venues.venue_type',
         'venues.id'
       )
@@ -27,6 +36,8 @@ const VenuesService = {
         'venues.address',
         'venues.zipcode',
         'venues.venue_type',
+        'venues.url',
+        'venues.phone',
         'venues.id'
       );
   },
@@ -40,19 +51,6 @@ const VenuesService = {
   },
 
 
-  serializeVenue(newVenue) {
-    return {
-      id: newVenue.id,
-      venue_name: xss(newVenue.venue_name),
-      venue_type: xss(newVenue.venue_type),
-      address: xss(newVenue.address),
-      city: xss(newVenue.city),
-      state: xss(newVenue.state),
-      zipcode: xss(newVenue.zipcode)
-    };
-  },
-
-
   getAmenitiesByVenue(db, venue_id) {
     return db
       .from('venues')
@@ -63,31 +61,7 @@ const VenuesService = {
       .groupBy('venues.venue_name', 'amenities.amenity_name');
   },
 
-
-  getUserReviews(db, id) {
-    return db
-      .from('reviews')
-      .select(
-        'reviews.id',
-        'reviews.content',
-        'reviews.price',
-        'reviews.starrating',
-        'reviews.volume',
-        'reviews.date_created',
-        'reviews.venue_id'
-      )
-      .join('users', 'reviews.user_id', '=', 'users.id')
-      .where('users.id', id)
-      .groupBy(
-        'reviews.id',
-        'reviews.content',
-        'reviews.price',
-        'reviews.starrating',
-        'reviews.volume',
-        'reviews.date_created',
-        'reviews.venue_id'
-      );
-  }
+  
 };
 
 module.exports = VenuesService;

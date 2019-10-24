@@ -6,7 +6,25 @@ const { requireAuth } = require('../middleware/jwt-auth');
 const ReviewsRouter = express.Router();
 const jsonBodyParser = express.json();
 
-//Get reviewsBy venue
+async function checkReview(req, res, next) {
+  try {
+    const review = await ReviewsService.getReviewById(
+      req.app.get('db'),
+      req.params.reviewId
+    );
+
+    if (!review)
+      return res.status(404).json({
+        error: `Review doesn't exist`
+      });
+
+    res.review = review;
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
 ReviewsRouter.route('/venues/:venueId/').get((req, res) => {
   ReviewsService.getReviewsByVenue(req.app.get('db'), req.params.venueId).then(
     reviews => {
@@ -16,31 +34,27 @@ ReviewsRouter.route('/venues/:venueId/').get((req, res) => {
 });
 
 ReviewsRouter.route('/:reviewId/votes')
+  .all(checkReview)
   .get((req, res, next) => {
-    ReviewsService.getVotesByReview(req.app.get('db'), req.params.reviewId).then(
-      votes => {
-        res.json(votes);
-      }
-    );
+    ReviewsService.getVotesByReview(
+      req.app.get('db'),
+      req.params.reviewId
+    ).then(votes => {
+      res.json(votes);
+    });
   })
-  .post(
-    requireAuth,
-    jsonBodyParser,
-    (req, res, next) => {
-      console.log('handling votes on the server');
-      const { votestatus, review_id } = req.body;
-      const newVote = { votestatus, review_id };
+  .post(requireAuth, jsonBodyParser, (req, res, next) => {
+    const { votestatus, review_id } = req.body;
+    const newVote = { votestatus, review_id };
 
-      //Do ur checkz
+    newVote.user_id = req.user.id;
 
-      newVote.user_id = req.user.id;
-      ReviewsService.postVotes(req.app.get('db'), newVote)
-        .then(vote => {
-          res.status(201).json(vote);
-        })
-        .catch(next);
-    }
-  );
+    ReviewsService.postVotes(req.app.get('db'), newVote)
+      .then(vote => {
+        res.status(201).json(vote);
+      })
+      .catch(next);
+  });
 
 ReviewsRouter.route('/userReviews')
   .all(requireAuth)
@@ -50,16 +64,14 @@ ReviewsRouter.route('/userReviews')
         res.json(profile);
       })
       .catch(err => {
-        console.log('Account error', err);
         next(err);
       });
   });
 
-ReviewsRouter.route('/:venueId')
-  // .all(requireAuth)
-  .post(requireAuth, jsonBodyParser, (req, res, next) => {
-    console.log('reviews/venueId');
-    //Try to clean this up.
+ReviewsRouter.route('/:venueId').post(
+  requireAuth,
+  jsonBodyParser,
+  (req, res, next) => {
     const {
       venue_id,
       content,
@@ -93,9 +105,10 @@ ReviewsRouter.route('/:venueId')
         })
         .catch(next);
     });
-  });
+  }
+);
 
-//MOVE TO USERS FOR THE LOVE OF GOD.
+//delete/edit reviews
 ReviewsRouter.route('/users/venues/:reviewId')
   .get((req, res, next) => {
     console.log('hitting /:reviewID route');
@@ -105,9 +118,7 @@ ReviewsRouter.route('/users/venues/:reviewId')
       })
       .catch(next);
   })
-
   .delete((req, res, next) => {
-    console.log('hitting delete route');
     ReviewsService.deleteReview(req.app.get('db'), req.params.reviewId)
       .then(numRowsAffected => {
         res.status(204).end();
