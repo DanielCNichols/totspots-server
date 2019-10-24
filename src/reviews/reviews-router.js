@@ -6,10 +6,8 @@ const { requireAuth } = require('../middleware/jwt-auth');
 const ReviewsRouter = express.Router();
 const jsonBodyParser = express.json();
 
-
-
 //Get reviewsBy venue
-ReviewsRouter.route('/:venueId/').get((req, res) => {
+ReviewsRouter.route('/venues/:venueId/').get((req, res) => {
   ReviewsService.getReviewsByVenue(req.app.get('db'), req.params.venueId).then(
     reviews => {
       res.json(reviews);
@@ -17,24 +15,32 @@ ReviewsRouter.route('/:venueId/').get((req, res) => {
   );
 });
 
-ReviewsRouter.route('/:reviewId/votes').post(
-  requireAuth, jsonBodyParser,
-  (req, res, next) => {
-    console.log('handling votes on the server');
-    const { votestatus, review_id,} = req.body;
-    const newVote = { votestatus, review_id};
+ReviewsRouter.route('/:reviewId/votes')
+  .get((req, res, next) => {
+    ReviewsService.getVotesByReview(req.app.get('db'), req.params.reviewId).then(
+      votes => {
+        res.json(votes);
+      }
+    );
+  })
+  .post(
+    requireAuth,
+    jsonBodyParser,
+    (req, res, next) => {
+      console.log('handling votes on the server');
+      const { votestatus, review_id } = req.body;
+      const newVote = { votestatus, review_id };
 
-    //Do ur checkz
+      //Do ur checkz
 
-    newVote.user_id = req.user.id;
-    ReviewsService.postVotes(req.app.get('db'), newVote)
-      .then(vote => {
-        res.status(201).json(vote);
-      })
-      .catch(next);
-  }
-);
-
+      newVote.user_id = req.user.id;
+      ReviewsService.postVotes(req.app.get('db'), newVote)
+        .then(vote => {
+          res.status(201).json(vote);
+        })
+        .catch(next);
+    }
+  );
 
 ReviewsRouter.route('/userReviews')
   .all(requireAuth)
@@ -67,7 +73,7 @@ ReviewsRouter.route('/:venueId')
       content,
       price,
       volume,
-      starrating,
+      starrating
     };
 
     for (const [key, value] of Object.entries(newReview))
@@ -75,13 +81,11 @@ ReviewsRouter.route('/:venueId')
         return res.status(400).json({ error: `Missing ${key} in request` });
       }
 
-      newReview.user_id = req.user.id;
-
-    console.log(amenities);
+    newReview.user_id = req.user.id;
 
     ReviewsService.addReview(req.app.get('db'), newReview).then(review => {
       ReviewsService.addAmenities(req.app.get('db'), amenities)
-        .then(amenity => {
+        .then(() => {
           res
             .status(201)
             .location(path.posix.join(req.originalUrl, `/${review.id}`))
@@ -91,13 +95,15 @@ ReviewsRouter.route('/:venueId')
     });
   });
 
-ReviewsRouter.route('/:reviewId')
+//MOVE TO USERS FOR THE LOVE OF GOD.
+ReviewsRouter.route('/users/venues/:reviewId')
   .get((req, res, next) => {
-    ReviewsService.getReviewsById(req.app.get('db'), req.params.reviewId).then(
-      reviews => {
+    console.log('hitting /:reviewID route');
+    ReviewsService.getReviewById(req.app.get('db'), req.params.reviewId)
+      .then(reviews => {
         res.json(reviews);
-      }
-    );
+      })
+      .catch(next);
   })
 
   .delete((req, res, next) => {
@@ -111,7 +117,6 @@ ReviewsRouter.route('/:reviewId')
   .patch(jsonBodyParser, (req, res, next) => {
     const { content, starrating, price, volume } = req.body;
     const updatedReview = { content, starrating, price, volume };
-    console.log(updatedReview)
     const numberOfValues = Object.values(updatedReview).filter(Boolean).length;
     if (numberOfValues === 0) {
       return res.status(400).json({
@@ -131,8 +136,5 @@ ReviewsRouter.route('/:reviewId')
       })
       .catch(next);
   });
-
-
-
 
 module.exports = ReviewsRouter;

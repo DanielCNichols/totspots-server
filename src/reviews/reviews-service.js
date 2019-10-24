@@ -2,11 +2,11 @@
 const xss = require('xss');
 
 const ReviewsService = {
-  getReviewsById(db, id) {
+  getReviewById(db, reviewId) {
     return db
       .from('reviews')
       .select('*')
-      .where('reviews.id', id)
+      .where('reviews.id', reviewId)
       .first();
   },
 
@@ -52,8 +52,11 @@ const ReviewsService = {
         'usr.first_name',
         'usr.last_name'
       )
+      .count('votes.votestatus')
       .where('reviews.venue_id', venue_id)
+      .andWhere('votes.votestatus', true)
       .join('users AS usr', 'reviews.user_id', 'usr.id')
+      .join('votes', 'reviews.id', 'votes.review_id')
       .groupBy('reviews.id', 'usr.id', 'usr.first_name', 'usr.last_name');
   },
 
@@ -67,9 +70,11 @@ const ReviewsService = {
         'reviews.starrating',
         'reviews.volume',
         'reviews.date_created',
-        'reviews.venue_id'
+        'reviews.venue_id',
+        'venues.venue_name'
       )
       .join('users', 'reviews.user_id', '=', 'users.id')
+      .join('venues', 'reviews.venue_id', '=', 'venues.id')
       .where('users.id', id)
       .groupBy(
         'reviews.id',
@@ -78,8 +83,18 @@ const ReviewsService = {
         'reviews.starrating',
         'reviews.volume',
         'reviews.date_created',
-        'reviews.venue_id'
+        'reviews.venue_id',
+        'venues.venue_name'
       );
+  },
+
+  getVotesByReview(db, reviewId) {
+    return db
+      .count('votestatus')
+      .from('votes')
+      .where('votes.votestatus', 'true')
+      .andWhere('votes.review_id', reviewId)
+      .groupBy('votes.votestatus');
   },
 
 

@@ -21,11 +21,11 @@ const UserService = {
     return (
       db
         .from('users')
-        .select('users.username', 'users.first_name', 'users.last_name')
+        .select('users.username', 'users.first_name', 'users.last_name', 'users.city', 'users.state', 'users.email')
         // .join('reviews', 'users.id', '=', 'reviews.user_id')
         .where('users.id', id)
         .first()
-        .groupBy('users.username', 'users.first_name', 'users.last_name')
+        .groupBy('users.username', 'users.first_name', 'users.last_name', 'users.city', 'users.state', 'users.email')
     );
   },
 
@@ -39,7 +39,9 @@ const UserService = {
         'venues.address',
         'venues.zipcode',
         'venues.venue_type',
-        'venues.id'
+        'venues.id',
+        'venues.url',
+        'venues.phone'
       )
       .join('users_favorites', 'users.id', '=', 'users_favorites.user_id')
       .join('venues', 'users_favorites.venue_id', '=', 'venues.id')
@@ -51,7 +53,9 @@ const UserService = {
         'venues.address',
         'venues.zipcode',
         'venues.venue_type',
-        'venues.id'
+        'venues.id',
+        'venues.url',
+        'venues.phone'
       );
   },
 
@@ -65,9 +69,11 @@ const UserService = {
         'reviews.starrating',
         'reviews.volume',
         'reviews.date_created',
-        'reviews.venue_id'
+        'reviews.venue_id',
+        'venue.venue_name'
       )
       .join('users', 'reviews.user_id', '=', 'users.id')
+      .join('venues','reviews.venue_id', '=', 'venues.id')
       .where('users.id', id)
       .groupBy(
         'reviews.id',
@@ -76,7 +82,8 @@ const UserService = {
         'reviews.starrating',
         'reviews.volume',
         'reviews.date_created',
-        'reviews.venue_id'
+        'reviews.venue_id',
+        'venue.venue_name'
       );
   }
 };
