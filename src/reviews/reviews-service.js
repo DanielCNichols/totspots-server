@@ -52,11 +52,11 @@ const ReviewsService = {
         'usr.first_name',
         'usr.last_name'
       )
-      // .count('votes.votestatus')
+      .count('votes.votestatus')
       .where('reviews.venue_id', venue_id)
-      // .andWhere('votes.votestatus', true)
+      .andWhere('votes.votestatus', true)
       .join('users AS usr', 'reviews.user_id', 'usr.id')
-      // .join('votes', 'reviews.id', 'votes.review_id')
+      .join('votes', 'reviews.id', 'votes.review_id')
       .groupBy('reviews.id', 'usr.id', 'usr.first_name', 'usr.last_name');
   },
 

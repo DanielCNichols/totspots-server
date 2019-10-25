@@ -1,5 +1,5 @@
 
-insert into users (id, first_name, last_name, email, Username, Password) values (1, 'Lowell', 'Worden', 'lworden0@addtoany.com', 'lworden0', '$2a$10$2KfTHarfNVRn6g6xlWG6zeelFpytUiO.eZ.GhcDk5lu3UBG16MdVu');
+insert into users (id, first_name, last_name, email, Username, Password) values (21, 'Lowell', 'Worden', 'lworden0@1addtoany.com', 'Daniel', '$2a$10$PK2cq67zVBnxzfDynApl7e.X9A4TmkoO8ksVtzzIYRdBPGxEWJOKO');
 insert into users (id, first_name, last_name, email, Username, Password) values (2, 'Nevil', 'Kirsop', 'nkirsop1@goodreads.com', 'nkirsop1', '$2a$10$PIGLFbWinyn1qzfQv3HGVeO5mxWKRbs9.wtUk8ZOI2q8WQ7j5d8vC');
 insert into users (id, first_name, last_name, email, Username, Password) values (3, 'Bengt', 'Grigoroni', 'bgrigoroni2@kickstarter.com', 'bgrigoroni2', '$2a$10$.i7ZdEmRRxtCe7T/wd5xiep5HVmOup0NDGdl1XKY/w.dM/9yguCoW');
 insert into users (id, first_name, last_name, email, Username, Password) values (4, 'Aline', 'Spedding', 'aspedding3@google.ca', 'aspedding3', '$2a$10$NkaHqwt0mPQedFoGs4mtDe5kY/vVv9TBTOt2irAUg9fGsEpKYmcKK');
