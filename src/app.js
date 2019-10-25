@@ -11,21 +11,9 @@ const ReviewsRouter = require('./reviews/reviews-router');
 const UserRouter = require('./user/UserRouter');
 const morganOption = NODE_ENV === 'production';
 const { CLIENT_ORIGIN } = require('./config');
-const { API_BASE_URL } = require('./config');
 
-export const fetchUserProfile = userId => dispatch => {
-  fetch(`${API_BASE_URL}/users/${userId}`)
-    .then(res => {
-      if (!res.ok) {
-        return Promise.reject(res.statusText);
-      }
-      return res.json();
-    })
-    .then(userProfile => {
-      dispatch(fetchUserProfileSuccess(userProfile));
-    })
-    .catch(err => dispatch(fetchUserProfileError(err)));
-};
+
+
 
 const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
 app.use(morgan(morganSetting));
