@@ -27,7 +27,8 @@ export const fetchUserProfile = userId => dispatch => {
     .catch(err => dispatch(fetchUserProfileError(err)));
 };
 
-app.use(morgan(morganOption));
+const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
+app.use(morgan(morganSetting));
 app.use(helmet());
 app.use(
   cors({
@@ -40,15 +41,16 @@ app.use('/api/reviews', ReviewsRouter);
 app.use('/api/auth', AuthRouter);
 app.use('/api/users', UserRouter);
 
-app.use(function errorHandler(error, req, res, next) {
-  let response;
-  if (NODE_ENV === 'production') {
-    response = { error: { message: 'server error' } };
+app.use((error, req, res, next) => {
+  let response
+  if (process.env.NODE_ENV === 'production') {
+    response = { error: { message: 'server error' }}
   } else {
-    console.error(error);
-    response = { message: error.message, error };
+    response = { error }
   }
-  res.status(500).json(response);
-});
+  res.status(500).json(response)
+})
+
+const PORT = process.env.PORT || 8000;
 
 module.exports = app;
