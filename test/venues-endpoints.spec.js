@@ -4,15 +4,13 @@ const {
   makeVenuesArray,
   makeAmenities,
   makeAmenVenues,
-  makeFavorites,
   makeReviews,
   makeUsersArray,
-  makeVotes,
   expectedVenues,
   makeMaliciousVenue,
   expectedAmenities,
   newVenue
-} = require('./venues-fixtures');
+} = require('./Test-fixtures');
 const app = require('../src/app');
 
 describe('Venues Endpoints', () => {
@@ -76,41 +74,6 @@ describe('Venues Endpoints', () => {
       });
     });
 
-    context('Given an xss attack venue', () => {
-      const { maliciousVenue, cleanedVenue } = makeMaliciousVenue();
-      const testVenues = makeVenuesArray();
-      const testUsers = makeUsersArray();
-      const testReviews = makeReviews();
-      const testExpectedVenues = expectedVenues();
-      beforeEach('insert venues, user, reviews, and malicious venues', () => {
-        return db
-          .into('venues')
-          .insert(testVenues)
-          .then(() => {
-            return db
-              .into('users')
-              .insert(testUsers)
-              .then(() => {
-                return db
-                  .into('reviews')
-                  .insert(testReviews)
-                  .then(() => {
-                    return db.into('venues').insert(maliciousVenue);
-                  });
-              });
-          });
-      });
-
-      it('removes xss attack content', () => {
-        return supertest(app)
-          .get('/api/venues/Durham/NC/Bar')
-          .expect(200)
-          .expect(res => {
-            expect(res.body).to.eql([...testExpectedVenues, cleanedVenue]);
-          });
-      });
-    });
-  });
 
   describe(' GET /:venueId/amenities', () => {
     context(`if there are amenities`, () => {
@@ -194,7 +157,7 @@ describe('Venues Endpoints', () => {
         });
     });
 
-    it.skip('responds with 201 if successful', () => {
+    it('responds with 201 if successful', () => {
       return supertest(app)
         .post('/api/venues/addVenue')
         .set('Authorization', makeAuthHeader(testUsers[0]))
@@ -227,38 +190,22 @@ describe('Venues Endpoints', () => {
       'price',
       'volume',
       'starrating',
-      'amenities'
     ];
 
     requiredFields.forEach(field => {
       const testUser = testUsers[0];
-      const newVenue = {
-        venue_name: 'Test',
-        venue_type: 'Bar',
-        address: 'test',
-        city: 'test',
-        state: 'test',
-        zipcode: 456123,
-        content: 'test',
-        phone: '65465465464',
-        url: 'test',
-        price: 3,
-        volume: 5,
-        starrating: 3,
-        amenities: [{ amenity: 1 }]
-      };
+      const testNewVenue = newVenue();
+      it(`responds with 400 and an error message when the '${field}' is missing`, () => {
+        delete testNewVenue[field];
 
-      // it(`responds with 400 and an error message when the '${field}' is missing`, () => {
-      //   delete newVenue[field];
-
-      //   return supertest(app)
-      //     .post('/api/venues/addVenue')
-      //     .set('Authorization', makeAuthHeader(testUser))
-      //     .send(newVenue)
-      //     .expect(400, {
-      //       error: `Missing '${field}' in request body`
-      //     });
-      // });
+        return supertest(app)
+          .post('/api/venues/addVenue')
+          .set('Authorization', makeAuthHeader(testUser))
+          .send(testNewVenue)
+          .expect(400, {
+            error: `Missing ${field} in request`
+          });
+      });
     });
   });
 });

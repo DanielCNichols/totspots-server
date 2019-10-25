@@ -21,8 +21,8 @@ CREATE TABLE venues(
 	city TEXT NOT NULL,
 	state TEXT NOT NULL,
 	zipcode NUMERIC,
-	url text,
-	phone NUMERIC
+	url text DEFAULT NULL,
+	phone DEFAULT NULL,
 );
 
 DROP TABLE IF EXISTS amenities;

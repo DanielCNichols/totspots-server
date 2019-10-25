@@ -2,14 +2,15 @@ const knex = require('knex');
 const jwt = require('jsonwebtoken');
 const {
   makeVenuesArray,
-  makeAmenities,
   makeReviews,
   makeUsersArray,
   makeVotes,
+  makeAmenities,
+  makeAmenVenues,
   expectedCount,
   expectedUserReviews,
   expectedReviews
-} = require('./venues-fixtures');
+} = require('./Test-fixtures');
 const app = require('../src/app');
 
 describe('Reviews Endpoints', () => {
@@ -71,6 +72,7 @@ describe('Reviews Endpoints', () => {
           });
       });
 
+      //date is set off
       it.skip('returns the reviews for a given venue', () => {
         return supertest(app)
           .get('/api/reviews/venues/1')
@@ -138,7 +140,7 @@ describe('Reviews Endpoints', () => {
               });
           });
 
-          it.skip('responds with 201 and the vote if successful', () => {
+          it('responds with 201 and the vote if successful', () => {
             return supertest(app)
               .post('/api/reviews/2/votes')
               .set('Authorization', makeAuthHeader(testUsers[1]))
@@ -153,7 +155,7 @@ describe('Reviews Endpoints', () => {
       });
     });
 
-    describe.only(' GET /api/reviews/userReviews', () => {
+    describe(' GET /api/reviews/userReviews', () => {
       context('Given there are reviews', () => {
         const testVenues = makeVenuesArray();
         const testUsers = makeUsersArray();
@@ -196,13 +198,78 @@ describe('Reviews Endpoints', () => {
       });
     });
 
-    describe.only(' POST api/review/venueId', () => {
+    describe(' POST api/review/venueId', () => {
       context('Given there are venues', () => {
         const testVenues = makeVenuesArray();
         const testUsers = makeUsersArray();
         const testReviews = makeReviews();
         const testVotes = makeVotes();
-        const testExpectedUserReviews = expectedUserReviews();
+        const testAmenities = makeAmenities();
+        const testAmenVenues = makeAmenVenues();
+        beforeEach('insert Venues and reviews', () => {
+          return db
+            .into('venues')
+            .insert(testVenues)
+            .then(() => {
+              return db
+                .into('users')
+                .insert(testUsers)
+                .then(() => {
+                  return db
+                    .into('reviews')
+                    .insert(testReviews)
+                    .then(() => {
+                      return db
+                        .into('votes')
+                        .insert(testVotes)
+                        .then(() => {
+                          return db
+                            .into('amenities')
+                            .insert(testAmenities)
+                            .then(() => {
+                              return db
+                                .into('amenities_venues')
+                                .insert(testAmenVenues);
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        const newReview = {
+          venue_id: '1',
+          content: 'test',
+          price: '3',
+          volume: '5',
+          starrating: '3',
+          amenities: [{ amenity: 1 }]
+        };
+
+        it('returns a 201 and review if posted successfully', () => {
+          return supertest(app)
+            .post('/api/reviews/venueId')
+            .set('Authorization', makeAuthHeader(testUsers[0]))
+            .send(newReview)
+            .expect(res => {
+              expect(res.body).to.have.property('id');
+              expect(res.body.venue_id).to.eql(1);
+              expect(res.body.content).to.eql(newReview.content);
+              expect(res.body.price).to.eql(newReview.price);
+              expect(res.body.volume).to.eql(newReview.volume);
+              expect(res.body.starrating).to.eql(newReview.starrating);
+            });
+        });
+      });
+    });
+
+    describe('api/reviews/users/venues/:reviewId', () => {
+      context('given there are reviews', () => {
+        const testVenues = makeVenuesArray();
+        const testUsers = makeUsersArray();
+        const testReviews = makeReviews();
+        const testVotes = makeVotes();
+        const testExpectedReview = expectedReviews();
         beforeEach('insert Venues and reviews', () => {
           return db
             .into('venues')
@@ -222,52 +289,93 @@ describe('Reviews Endpoints', () => {
             });
         });
 
-        const requiredFields = [
-          'content',
-          'venue_id',
-          'price',
-          'volume',
-          'starrating',
-          'amenities'
-        ];
+        it('returns the requested review by id', () => {
+          return supertest(app)
+            .get('/api/reviews/users/venues/1')
+            .set('Authorization', makeAuthHeader(testUsers[0]))
+            .expect(200, testExpectedReview);
+        });
+      });
+    });
 
-        requiredFields.forEach(field => {
-          const testUser = testUsers[0];
-          const newReview = {
-            venue_id: 1,
-            content: 'test',
-            price: 3,
-            volume: 5,
-            starrating: 3,
-            amenities: [{ amenity: 1 }]
-          };
+    describe('DELETE api/users/venues/:reviewId', () => {
+      context('Given reviews', () => {
+        const testVenues = makeVenuesArray();
+        const testUsers = makeUsersArray();
+        const testReviews = makeReviews();
+        const testVotes = makeVotes();
+        beforeEach('insert Venues and reviews', () => {
+          return db
+            .into('venues')
+            .insert(testVenues)
+            .then(() => {
+              return db
+                .into('users')
+                .insert(testUsers)
+                .then(() => {
+                  return db
+                    .into('reviews')
+                    .insert(testReviews)
+                    .then(() => {
+                      return db.into('votes').insert(testVotes);
+                    });
+                });
+            });
+        });
 
-          it('returns a 201 and review if posted successfully', () => {
-            return supertest(app)
-              .post('/api/reviews/venueId')
-              .set('Authorization', makeAuthHeader(testUsers[0]))
-              .send({
-                venue_id: 1,
-                content: 'this is a test',
-                price: 2,
-                volume: 3,
-                starrating: 4,
-                amenities: { amenity: 1 }
-              })
-              .expect(res => {
-                expect(res.body).to.have.property('id');
-                expect(res.body.venue_id).to.eql();
+        it('responds with 204 and deletes the review', () => {
+          const id = 1;
+
+          return supertest(app)
+            .delete(`/api/reviews/users/venues/${id}`)
+            .set('Authorization', makeAuthHeader(testUsers[0]))
+            .expect(204)
+            .then(() => {
+              return supertest(app)
+                .get(`/api/reviews/users/venues/${id}`)
+                .expect(404);
+            });
+        });
+      });
+
+      describe('Patch api/reviews/users/venues/reviewid', () => {
+        context('given there are reviews', () => {
+          const testVenues = makeVenuesArray();
+          const testUsers = makeUsersArray();
+          const testReviews = makeReviews();
+          const testVotes = makeVotes();
+
+          beforeEach('insert Venues and reviews', () => {
+            return db
+              .into('venues')
+              .insert(testVenues)
+              .then(() => {
+                return db
+                  .into('users')
+                  .insert(testUsers)
+                  .then(() => {
+                    return db
+                      .into('reviews')
+                      .insert(testReviews)
+                      .then(() => {
+                        return db.into('votes').insert(testVotes);
+                      });
+                  });
               });
+          });
+          it('Updates the requested review', () => {
+            const id = 1;
+            const newReview = { content: 'this is updated content' };
+            return supertest(app)
+              .patch(`/api/reviews/users/venues/${id}`)
+              .set('Authorization', makeAuthHeader(testUsers[0]))
+              .send(newReview)
+              .expect(204, {});
           });
         });
       });
     });
   });
-
-  //test to see if it takes newreviews
-  //does it take
-
-  //test to see how it handles votes (correct, incorrect, none)
 });
 
 function makeAuthHeader(user, secret = process.env.JWT_SECRET) {

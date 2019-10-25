@@ -42,7 +42,7 @@ UserRouter.route('/favorites')
 
     UserService.addFavorite(req.app.get('db'), newFavorite)
       .then(favorite => {
-        res.json(favorite);
+        res.status(200).json(favorite);
       })
       .catch(err => {
         next(err);
@@ -67,19 +67,6 @@ UserRouter.route('/favorites')
       .catch(next);
   });
 
-
-  UserRouter.route('/userReviews')
-  .all(requireAuth)
-  .get(requireAuth, (req, res, next) => {
-    UserService.getUserReviews(req.app.get('db'), req.user.id)
-      .then(profile => {
-        res.json(profile);
-      })
-      .catch(err => {
-        console.log('Account error', err);
-        next(err);
-      });
-  });
 
 
   module.exports = UserRouter;

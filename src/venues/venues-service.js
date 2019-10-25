@@ -1,4 +1,3 @@
-
 const VenuesService = {
   getVenueById(db, id) {
     return db
@@ -47,9 +46,10 @@ const VenuesService = {
       .insert(newVenue)
       .into('venues')
       .returning('*')
-      .then(([venue]) => venue);
+      .then(rows => {
+        return rows[0];
+      });
   },
-
 
   getAmenitiesByVenue(db, venue_id) {
     return db
@@ -59,9 +59,7 @@ const VenuesService = {
       .join('amenities', 'amenities_venues.amenity', '=', 'amenities.id')
       .where('venues.id', venue_id)
       .groupBy('venues.venue_name', 'amenities.amenity_name');
-  },
-
-  
+  }
 };
 
 module.exports = VenuesService;

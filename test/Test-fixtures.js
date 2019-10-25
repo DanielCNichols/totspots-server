@@ -4,7 +4,6 @@ function makeVenuesArray() {
       venue_name: 'Bull McCabes',
       city: 'Durham',
       state: 'NC',
-      id: 1,
       address: '123 Main st.',
       zipcode: '27705',
       venue_type: 'Bar',
@@ -15,7 +14,6 @@ function makeVenuesArray() {
       venue_name: 'Ponysaurus',
       city: 'Durham',
       state: 'NC',
-      id: 2,
       address: '159 West chapel st.',
       zipcode: '27705',
       venue_type: 'Bar',
@@ -28,7 +26,6 @@ function makeVenuesArray() {
 function makeUsersArray() {
   return [
     {
-      id: 1,
       first_name: 'Daniel',
       last_name: 'Nichols',
       email: 'dcnichols@gmail.com',
@@ -39,7 +36,6 @@ function makeUsersArray() {
     },
 
     {
-      id: 2,
       first_name: 'Daniel',
       last_name: 'Nichols',
       email: 'dcnichols@gmail.com',
@@ -59,7 +55,7 @@ function makeFavorites() {
     },
     {
       user_id: 1,
-      venue_id: 2
+      venue_id: 1
     }
   ];
 }
@@ -67,12 +63,10 @@ function makeFavorites() {
 function makeAmenities() {
   return [
     {
-      id: 1,
       amenity_name: 'changing table'
     },
 
     {
-      id: 2,
       amenity_name: 'Stroller Accessible'
     }
   ];
@@ -98,7 +92,6 @@ function makeReviews() {
       venue_id: 1,
       content: 'This is a test',
       price: 3,
-      id: 1,
       volume: 4,
       starrating: 5,
       user_id: 1
@@ -108,7 +101,6 @@ function makeReviews() {
       content: 'This is also a test',
       price: 2,
       volume: 3,
-      id: 2,
       starrating: 4,
       user_id: 1
     }
@@ -118,13 +110,11 @@ function makeReviews() {
 function makeVotes() {
   return [
     {
-      id: 1,
       user_id: 1,
       review_id: 1,
       votestatus: true
     },
     {
-      id: 2,
       user_id: 1,
       review_id: 1,
       votestatus: true
@@ -148,6 +138,20 @@ function expectedAmenities() {
 function expectedVenues() {
   return [
     {
+      venue_name: 'Ponysaurus',
+      city: 'Durham',
+      state: 'NC',
+      address: '159 West chapel st.',
+      zipcode: '27705',
+      venue_type: 'Bar',
+      id: '2',
+      url: 'thisisalsoaurl',
+      phone: '7894561233',
+      avgPrice: '2.0000000000000000',
+      avgRating: '4.0000000000000000',
+      avgVolume: '3.0000000000000000'
+    },
+    {
       venue_name: 'Bull McCabes',
       city: 'Durham',
       state: 'NC',
@@ -161,29 +165,15 @@ function expectedVenues() {
       avgRating: '5.0000000000000000',
       avgVolume: '4.0000000000000000'
     },
-    {
-      venue_name: 'Ponysaurus',
-      city: 'Durham',
-      state: 'NC',
-      address: '159 West chapel st.',
-      zipcode: '27705',
-      venue_type: 'Bar',
-      id: '2',
-      url: 'thisisalsoaurl',
-      phone: '7894561233',
-      avgPrice: '2.0000000000000000',
-      avgRating: '4.0000000000000000',
-      avgVolume: '3.0000000000000000'
-    }
   ];
 }
 
 function makeMaliciousVenue() {
   const maliciousVenue = {
-    id: '123',
     venue_name: 'HACKIN IT UP <script>alert("xss")</script>',
     venue_type: 'Bar',
     city: 'Durham',
+    id: '3',
     state: 'NC',
     zipcode: '12345',
     address: 'thisisanaddress',
@@ -208,13 +198,13 @@ function makeMaliciousVenue() {
 function newVenue() {
   return {
     venue_name: 'qwert',
+    venue_type: 'Bar',
+    address: 'qewr',
     city: 'qwer',
     state: 'qwer',
-    address: 'qewr',
     zipcode: 27705,
-    venue_type: 'Bar',
-    url: 'tqewr',
     phone: '654964654',
+    url: 'tqewr',
     content: 'qwetrqe',
     price: 2,
     volume: 3,
@@ -236,7 +226,6 @@ function expectedReviews() {
       user_id: 1,
       first_name: 'Daniel',
       last_name: 'Nichols',
-      count: '1'
     },
   ];
 }
@@ -273,14 +262,55 @@ function expectedUserReviews() {
   ];
 }
 
+function expectedUser() {
+  return {
+    first_name: 'Daniel',
+    last_name: 'Nichols',
+    email: 'dcnichols@gmail.com',
+    city: 'Durm',
+    state: 'NC',
+    username: 'dnick',
+  }
+};
+
+
+
+function expectedFavorites() {
+  return [
+    {
+      address: "123 Main st.",
+      city: "Durham",
+      id: 1,
+      phone: "3333333333",
+      state: "NC",
+      url: "thisisaurl",
+      venue_name: "Bull McCabes",
+      venue_type: "Bar",
+      zipcode: "27705",
+    },
+    {
+      id: 2,
+      phone: "7894561233",
+      state: "NC",
+      url: "thisisalsoaurl",
+      address: "159 West chapel st.",
+      city: "Durham",
+      venue_name: "Ponysaurus",
+      venue_type: "Bar",
+      zipcode: "27705",
+    }
+  ]
+}
 module.exports = {
   makeVenuesArray,
   makeAmenities,
   makeAmenVenues,
   makeFavorites,
   makeReviews,
+  expectedFavorites,
   makeUsersArray,
   makeVotes,
+  expectedUser,
   expectedVenues,
   expectedAmenities,
   makeMaliciousVenue,

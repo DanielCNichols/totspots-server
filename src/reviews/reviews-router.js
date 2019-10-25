@@ -89,7 +89,7 @@ ReviewsRouter.route('/:venueId').post(
     };
 
     for (const [key, value] of Object.entries(newReview))
-      if (value === null) {
+      if (!value || value === null) {
         return res.status(400).json({ error: `Missing ${key} in request` });
       }
 

@@ -42,7 +42,6 @@ const serializeVenue = venue => ({
 });
 
 VenuesRouter.route('/:city/:state/:type').get((req, res) => {
-  console.log('hits router');
   VenuesService.getVenuesByCity(
     req.app.get('db'),
     req.params.city,
@@ -63,7 +62,6 @@ VenuesRouter.route('/:venueId/amenities')
       res.json(amenities);
     });
   });
-
 
 VenuesRouter.route('/addVenue').post(
   requireAuth,
@@ -95,6 +93,7 @@ VenuesRouter.route('/addVenue').post(
       phone,
       url
     };
+
     const newReview = {
       content,
       price,
@@ -104,28 +103,36 @@ VenuesRouter.route('/addVenue').post(
     const newAmenities = amenities;
 
     for (const [key, value] of Object.entries(newVenue))
-      if (value === null) {
+      if (!value || value === null) {
         return res.status(400).json({ error: `Missing ${key} in request` });
       }
 
+
     for (const [key, value] of Object.entries(newReview))
-      if (value === null) {
+      if (!value || value === null) {
         return res
           .status(400)
-          .json({ error: `Missing ${key} in review request` });
+          .json({ error: `Missing ${key} in request` });
       }
 
+
     newReview.user_id = req.user.id;
+
 
     if (!newReview.user_id) {
       return res.status(401).json({ error: 'Unauthorized Request' });
     }
 
+
     let venue = null;
     VenuesService.addVenue(req.app.get('db'), newVenue)
       .then(MyVenue => {
+        console.log(MyVenue)
         venue = MyVenue;
+        console.log('WE MADE IT TOO THE ADD VENUE SERVICE');
+        console.log(venue);
         newReview.venue_id = venue.id;
+        console.log(venue.id);
 
         return ReviewsService.addReview(req.app.get('db'), newReview);
       })
