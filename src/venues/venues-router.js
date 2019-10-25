@@ -127,12 +127,8 @@ VenuesRouter.route('/addVenue').post(
     let venue = null;
     VenuesService.addVenue(req.app.get('db'), newVenue)
       .then(MyVenue => {
-        console.log(MyVenue)
         venue = MyVenue;
-        console.log('WE MADE IT TOO THE ADD VENUE SERVICE');
-        console.log(venue);
         newReview.venue_id = venue.id;
-        console.log(venue.id);
 
         return ReviewsService.addReview(req.app.get('db'), newReview);
       })

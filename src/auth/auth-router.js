@@ -6,7 +6,6 @@ const AuthRouter = express.Router();
 
 AuthRouter.post('/login', jsonBodyParser, (req, res, next) => {
   const { username, password } = req.body;
-  console.log(username, password);
   const user = { username, password };
 
   //if one of these is missing, forget it

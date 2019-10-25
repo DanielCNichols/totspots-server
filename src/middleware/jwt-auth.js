@@ -10,10 +10,8 @@ function requireAuth(req, res, next) {
     bearerToken = authToken.slice(7, authToken.length);
   }
 
-  console.log(bearerToken);
   try {
     const payload = Authorization.verifyJwt(bearerToken);
-    console.log(payload)
     Authorization.getUserName(req.app.get('db'), payload.sub)
       .then(user => {
         if (!user)

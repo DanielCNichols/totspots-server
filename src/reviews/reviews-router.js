@@ -111,7 +111,6 @@ ReviewsRouter.route('/:venueId').post(
 //delete/edit reviews
 ReviewsRouter.route('/users/venues/:reviewId')
   .get((req, res, next) => {
-    console.log('hitting /:reviewID route');
     ReviewsService.getReviewById(req.app.get('db'), req.params.reviewId)
       .then(reviews => {
         res.json(reviews);

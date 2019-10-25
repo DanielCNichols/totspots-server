@@ -99,7 +99,6 @@ const ReviewsService = {
 
 
   postVotes(db, newVote) {
-    console.log('posting votes');
     return db
       .insert(newVote)
       .into('votes')
