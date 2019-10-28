@@ -8,8 +8,6 @@ AuthRouter.post('/login', jsonBodyParser, (req, res, next) => {
   const { username, password } = req.body;
   const user = { username, password };
 
-  //if one of these is missing, forget it
-
   for (const [key, value] of Object.entries(user))
     if (value === null) {
       return res.status(400).json({

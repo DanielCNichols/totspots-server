@@ -26,6 +26,28 @@ async function checkVenue(req, res, next) {
   }
 }
 
+
+async function checkSearch(req, res, next) {
+  try {
+    const venue = await VenuesService.getVenuesByCity(
+      req.app.get('db'),
+      req.params.city,
+      req.params.state,
+      req.params.type,
+    );
+
+    if (!venue)
+      return res.status(404).json({
+        error: `Venue doesn't exist`
+      });
+
+    res.venue = venue;
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
 const serializeVenue = venue => ({
   id: xss(venue.id),
   venue_name: xss(venue.venue_name),
@@ -41,26 +63,30 @@ const serializeVenue = venue => ({
   avgVolume: venue.avgVolume
 });
 
-VenuesRouter.route('/:city/:state/:type').get((req, res) => {
+VenuesRouter.route('/:city/:state/:type')
+.all(checkSearch)
+.get((req, res, next) => {
   VenuesService.getVenuesByCity(
     req.app.get('db'),
     req.params.city,
     req.params.state,
     req.params.type
   ).then(venues => {
-    res.json(venues.map(serializeVenue));
-  });
+    res.json(venues.map(serializeVenue))
+  })
+  .catch(next)
 });
 
 VenuesRouter.route('/:venueId/amenities')
   .all(checkVenue)
-  .get((req, res) => {
+  .get((req, res, next) => {
     VenuesService.getAmenitiesByVenue(
       req.app.get('db'),
       req.params.venueId
     ).then(amenities => {
-      res.json(amenities);
-    });
+      res.json(amenities)
+    })
+    .catch(next)
   });
 
 VenuesRouter.route('/addVenue').post(
@@ -126,8 +152,8 @@ VenuesRouter.route('/addVenue').post(
 
     let venue = null;
     VenuesService.addVenue(req.app.get('db'), newVenue)
-      .then(MyVenue => {
-        venue = MyVenue;
+      .then(addVenue => {
+        venue = addVenue;
         newReview.venue_id = venue.id;
 
         return ReviewsService.addReview(req.app.get('db'), newReview);
@@ -140,7 +166,7 @@ VenuesRouter.route('/addVenue').post(
         res.status(201).json(venue);
       })
       .catch(error => {
-        next(error);
+        next(`Problem adding venue. Please try again.`);
       });
   }
 );

@@ -52,11 +52,13 @@ const ReviewsService = {
         'usr.first_name',
         'usr.last_name'
       )
+      .avg({ avgPrice: 'reviews.price' })
+      .avg({ avgRating: 'reviews.starrating' })
+      .avg({ avgVolume: 'reviews.volume' })
       .count('votes.votestatus')
       .where('reviews.venue_id', venue_id)
-      .andWhere('votes.votestatus', true)
-      .join('users AS usr', 'reviews.user_id', 'usr.id')
-      .join('votes', 'reviews.id', 'votes.review_id')
+      .leftJoin('users AS usr', 'reviews.user_id', 'usr.id')
+      .leftJoin('votes', 'reviews.id', 'votes.review_id')
       .groupBy('reviews.id', 'usr.id', 'usr.first_name', 'usr.last_name');
   },
 

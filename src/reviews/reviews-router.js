@@ -36,12 +36,11 @@ ReviewsRouter.route('/venues/:venueId/').get((req, res) => {
 ReviewsRouter.route('/:reviewId/votes')
   .all(checkReview)
   .get((req, res, next) => {
-    ReviewsService.getVotesByReview(
-      req.app.get('db'),
-      req.params.reviewId
-    ).then(votes => {
-      res.json(votes);
-    });
+    ReviewsService.getVotesByReview(req.app.get('db'), req.params.reviewId)
+      .then(votes => {
+        res.json(votes)
+      })
+      .catch(next);
   })
   .post(requireAuth, jsonBodyParser, (req, res, next) => {
     const { votestatus, review_id } = req.body;
@@ -51,9 +50,9 @@ ReviewsRouter.route('/:reviewId/votes')
 
     ReviewsService.postVotes(req.app.get('db'), newVote)
       .then(vote => {
-        res.status(201).json(vote);
+        res.status(201).json(vote)
       })
-      .catch(next);
+      .catch(next)
   });
 
 ReviewsRouter.route('/userReviews')
@@ -61,11 +60,9 @@ ReviewsRouter.route('/userReviews')
   .get(requireAuth, (req, res, next) => {
     ReviewsService.getUserReviews(req.app.get('db'), req.user.id)
       .then(profile => {
-        res.json(profile);
+        res.json(profile)
       })
-      .catch(err => {
-        next(err);
-      });
+      .catch(next);
   });
 
 ReviewsRouter.route('/:venueId').post(
@@ -90,7 +87,7 @@ ReviewsRouter.route('/:venueId').post(
 
     for (const [key, value] of Object.entries(newReview))
       if (!value || value === null) {
-        return res.status(400).json({ error: `Missing ${key} in request` });
+        return res.status(400).json({ error: `Missing ${key} in request` })
       }
 
     newReview.user_id = req.user.id;
@@ -101,32 +98,34 @@ ReviewsRouter.route('/:venueId').post(
           res
             .status(201)
             .location(path.posix.join(req.originalUrl, `/${review.id}`))
-            .json(ReviewsService.serializeReview(review));
+            .json(ReviewsService.serializeReview(review))
         })
-        .catch(next);
-    });
+    })
+    .catch(next)
   }
 );
 
 //delete/edit reviews
 ReviewsRouter.route('/users/venues/:reviewId')
+  .all(checkReview)
   .get((req, res, next) => {
     ReviewsService.getReviewById(req.app.get('db'), req.params.reviewId)
       .then(reviews => {
-        res.json(reviews);
+        res.json(reviews)
       })
       .catch(next);
   })
   .delete((req, res, next) => {
     ReviewsService.deleteReview(req.app.get('db'), req.params.reviewId)
-      .then(numRowsAffected => {
-        res.status(204).end();
+      .then(() => {
+        res.status(204).end()
       })
       .catch(next);
   })
   .patch(jsonBodyParser, (req, res, next) => {
     const { content, starrating, price, volume } = req.body;
     const updatedReview = { content, starrating, price, volume };
+
     const numberOfValues = Object.values(updatedReview).filter(Boolean).length;
     if (numberOfValues === 0) {
       return res.status(400).json({
@@ -142,7 +141,7 @@ ReviewsRouter.route('/users/venues/:reviewId')
       updatedReview
     )
       .then(numRowsAffected => {
-        res.status(204).end();
+        res.status(204).end()
       })
       .catch(next);
   });
