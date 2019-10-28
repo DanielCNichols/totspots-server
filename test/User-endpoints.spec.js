@@ -34,7 +34,7 @@ describe('User endpoints', () => {
     )
   );
 
-  describe.only('/account', () => {
+  describe('/account', () => {
     context('given there are is a user profile', () => {
       const testUsers = makeUsersArray();
       const testExpectedUser = expectedUser();
@@ -52,7 +52,7 @@ describe('User endpoints', () => {
     });
   });
 
-  describe.only('/api/users/favorites', () => {
+  describe('/api/users/favorites', () => {
     context('Given there are favorites', () => {
       const testUsers = makeUsersArray();
       const testFavorites = makeFavorites();

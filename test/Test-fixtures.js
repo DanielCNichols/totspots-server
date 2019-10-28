@@ -224,8 +224,25 @@ function expectedReviews() {
       date_created: new Date(),
       venue_id: 1,
       user_id: 1,
+      count: '2',
       first_name: 'Daniel',
       last_name: 'Nichols',
+    },
+  ];
+}
+
+function expectedReviewById() {
+  return [
+    {
+      id: 1,
+      content: 'This is a test',
+      price: 3,
+      starrating: 5,
+      volume: 4,
+      date_created: new Date(),
+      venue_id: 1,
+      user_id: 1,
+      count: 2
     },
   ];
 }
@@ -317,5 +334,6 @@ module.exports = {
   expectedCount,
   expectedUserReviews,
   newVenue,
-  expectedReviews
+  expectedReviews,
+  expectedReviewById
 };
