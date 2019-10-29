@@ -9,14 +9,14 @@ const app = express();
 const AuthRouter = require('./auth/auth-router');
 const ReviewsRouter = require('./reviews/reviews-router');
 const UserRouter = require('./user/UserRouter');
-const morganOption = NODE_ENV === 'production';
+
 const { CLIENT_ORIGIN } = require('./config');
 
 
 
 
 const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
-app.use(morgan(morganOption));
+app.use(morgan(morganSetting));
 app.use(helmet());
 app.use(
   cors({
