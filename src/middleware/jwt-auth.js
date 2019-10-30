@@ -15,7 +15,7 @@ function requireAuth(req, res, next) {
     Authorization.getUserName(req.app.get('db'), payload.sub)
       .then(user => {
         if (!user)
-          return res.status(401).json({ error: 'Unauthorized request anmd USERNAME' });
+          return res.status(401).json({ error: 'Invalid username or password' });
 
         req.user = user;
         next();
@@ -25,7 +25,7 @@ function requireAuth(req, res, next) {
         next(err);
       });
   } catch (error) {
-    res.status(401).json({ error: 'Unauthorized request PASSWORD' });
+    res.status(401).json({ error: 'Invalid username or password' });
   }
 }
 
