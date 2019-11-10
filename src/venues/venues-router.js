@@ -64,11 +64,12 @@ const serializeVenue = venue => ({
 });
 
 VenuesRouter.route('/:venueId') 
-.all(checkSearch)
+.all(checkVenue)
 .get((req, res, next) => {
+  console.log(req.params)
   VenuesService.getVenueById(req.app.get('db'), req.params.venueId)
   .then(venue => {
-    res.json(venue.map(serializeVenue))
+    res.json(venue)
   })
   .catch(next)
 })
