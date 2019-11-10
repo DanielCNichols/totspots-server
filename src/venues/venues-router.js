@@ -63,6 +63,16 @@ const serializeVenue = venue => ({
   avgVolume: venue.avgVolume
 });
 
+VenuesRouter.route('/:venueId') 
+.all(checkSearch)
+.get((req, res, next) => {
+  VenuesService.getVenueById(req.app.get('db'), req.params.venueId)
+  .then(venue => {
+    res.json(venue.map(serializeVenue))
+  })
+  .catch(next)
+})
+
 VenuesRouter.route('/:city/:state/:type')
 .all(checkSearch)
 .get((req, res, next) => {
