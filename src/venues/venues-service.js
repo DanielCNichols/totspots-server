@@ -18,6 +18,7 @@ const VenuesService = {
       .avg({ avgVolume: 'reviews.volume' })
       .leftJoin('reviews', 'venues.id', '=', 'reviews.venue_id')
       .where('venues.id', id)
+      .first()
       .groupBy(
         'venues.venue_name',
         'venues.city',
