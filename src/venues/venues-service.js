@@ -2,9 +2,33 @@ const VenuesService = {
   getVenueById(db, id) {
     return db
       .from('venues')
-      .select('*')
+      .select(
+        'venues.venue_name',
+        'venues.city',
+        'venues.state',
+        'venues.address',
+        'venues.zipcode',
+        'venues.phone',
+        'venues.url',
+        'venues.venue_type',
+        'venues.id'
+      )
+      .avg({ avgPrice: 'reviews.price' })
+      .avg({ avgRating: 'reviews.starrating' })
+      .avg({ avgVolume: 'reviews.volume' })
+      .leftJoin('reviews', 'venues.id', '=', 'reviews.venue_id')
       .where('venues.id', id)
-      .first();
+      .groupBy(
+        'venues.venue_name',
+        'venues.city',
+        'venues.state',
+        'venues.address',
+        'venues.zipcode',
+        'venues.venue_type',
+        'venues.url',
+        'venues.phone',
+        'venues.id'
+      );
   },
 
   getVenuesByCity(db, city, state, type) {

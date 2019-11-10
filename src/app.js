@@ -18,10 +18,10 @@ const { CLIENT_ORIGIN } = require('./config');
 const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
 app.use(morgan(morganSetting));
 app.use(helmet());
-app.use(
-  cors({
-    origin: CLIENT_ORIGIN
-  })
+app.use(cors()
+  // cors({
+  //   origin: CLIENT_ORIGIN
+  // })
 );
 
 app.use('/api/venues', VenuesRouter);
