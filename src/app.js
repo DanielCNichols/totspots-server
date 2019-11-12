@@ -11,12 +11,8 @@ const ReviewsRouter = require('./reviews/reviews-router');
 const UserRouter = require('./user/UserRouter');
 
 const { CLIENT_ORIGIN } = require('./config');
-
-
-
-
 const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
-app.use(morgan('common'));
+app.use(morgan(morganSetting));
 app.use(helmet());
 app.use(cors()
   // cors({
@@ -30,7 +26,7 @@ app.use('/api/auth', AuthRouter);
 app.use('/api/users', UserRouter);
 
 app.use((error, req, res, next) => {
-  let response
+  let response;
   if (process.env.NODE_ENV === 'production') {
     response = { error: { message: 'server error' }}
   } else {

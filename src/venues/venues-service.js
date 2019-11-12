@@ -84,7 +84,7 @@ const VenuesService = {
       .join('amenities', 'amenities_venues.amenity', '=', 'amenities.id')
       .where('venues.id', venue_id)
       .groupBy('venues.venue_name', 'amenities.amenity_name');
-  }
+  },
 };
 
 module.exports = VenuesService;

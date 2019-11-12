@@ -63,7 +63,7 @@ const serializeVenue = venue => ({
   avgVolume: venue.avgVolume
 });
 
-VenuesRouter.route('/:venueId') 
+VenuesRouter.route('/profile/:venueId') 
 .all(checkVenue)
 .get((req, res, next) => {
   console.log(req.params)
@@ -131,13 +131,21 @@ VenuesRouter.route('/addVenue').post(
       url
     };
 
+    console.log(newVenue)
+
     const newReview = {
       content,
       price,
       volume,
       starrating
     };
+
+    console.log(newVenue)
+
+
     const newAmenities = amenities;
+
+    console.log(newAmenities)
 
     for (const [key, value] of Object.entries(newVenue))
       if (!value || value === null) {

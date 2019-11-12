@@ -1,5 +1,3 @@
-
-
 const UserService = {
   addFavorite(db, newFavorite) {
     return db
@@ -17,14 +15,26 @@ const UserService = {
   },
 
   getProfile(db, id) {
-    return (
-      db
-        .from('users')
-        .select('users.username', 'users.first_name', 'users.last_name', 'users.city', 'users.state', 'users.email')
-        .where('users.id', id)
-        .first()
-        .groupBy('users.username', 'users.first_name', 'users.last_name', 'users.city', 'users.state', 'users.email')
-    );
+    return db
+      .from('users')
+      .select(
+        'users.username',
+        'users.first_name',
+        'users.last_name',
+        'users.city',
+        'users.state',
+        'users.email'
+      )
+      .where('users.id', id)
+      .first()
+      .groupBy(
+        'users.username',
+        'users.first_name',
+        'users.last_name',
+        'users.city',
+        'users.state',
+        'users.email'
+      );
   },
 
   getFavorites(db, id) {
@@ -71,7 +81,7 @@ const UserService = {
         'venue.venue_name'
       )
       .join('users', 'reviews.user_id', '=', 'users.id')
-      .join('venues','reviews.venue_id', '=', 'venues.id')
+      .join('venues', 'reviews.venue_id', '=', 'venues.id')
       .where('users.id', id)
       .groupBy(
         'reviews.id',
@@ -83,34 +93,7 @@ const UserService = {
         'reviews.venue_id',
         'venue.venue_name'
       );
-  }
-
-
-//   getUserReviews(db, id) {
-//     return db
-//       .from('reviews')
-//       .select(
-//         'reviews.id',
-//         'reviews.content',
-//         'reviews.price',
-//         'reviews.starrating',
-//         'reviews.volume',
-//         'reviews.date_created',
-//         'reviews.venue_id'
-//       )
-//       .join('users', 'reviews.user_id', '=', 'users.id')
-//       .where('users.id', id)
-//       .groupBy(
-//         'reviews.id',
-//         'reviews.content',
-//         'reviews.price',
-//         'reviews.starrating',
-//         'reviews.volume',
-//         'reviews.date_created',
-//         'reviews.venue_id'
-//       );
-//   }
-// };
+  },
 };
 
 module.exports = UserService;
