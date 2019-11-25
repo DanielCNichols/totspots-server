@@ -16,7 +16,7 @@ async function checkVenue(req, res, next) {
 
     if (!venue)
       return res.status(404).json({
-        error: `Venue doesn't exist`
+        error: `Venue doesn't exist`,
       });
 
     res.venue = venue;
@@ -26,19 +26,18 @@ async function checkVenue(req, res, next) {
   }
 }
 
-
 async function checkSearch(req, res, next) {
   try {
     const venue = await VenuesService.getVenuesByCity(
       req.app.get('db'),
       req.params.city,
       req.params.state,
-      req.params.type,
+      req.params.type
     );
 
     if (!venue)
       return res.status(404).json({
-        error: `Venue doesn't exist`
+        error: `Venue doesn't exist`,
       });
 
     res.venue = venue;
@@ -60,46 +59,51 @@ const serializeVenue = venue => ({
   url: xss(venue.url),
   avgRating: venue.avgRating,
   avgPrice: venue.avgPrice,
-  avgVolume: venue.avgVolume
+  avgVolume: venue.avgVolume,
 });
 
-VenuesRouter.route('/profile/:venueId') 
-.all(checkVenue)
-.get((req, res, next) => {
-  console.log(req.params)
-  VenuesService.getVenueById(req.app.get('db'), req.params.venueId)
-  .then(venue => {
-    res.json(venue)
-  })
-  .catch(next)
-})
+//Gets information to build the venue profile
+VenuesRouter.route('/profile/:venueId')
+  .all(checkVenue)
+  .get((req, res, next) => {
+    console.log(req.params);
+    VenuesService.getVenueById(req.app.get('db'), req.params.venueId)
+      .then(venue => {
+        res.json(venue);
+      })
+      .catch(next);
+  });
 
+//Retrieves list of results for inital venue search
 VenuesRouter.route('/:city/:state/:type')
-.all(checkSearch)
-.get((req, res, next) => {
-  VenuesService.getVenuesByCity(
-    req.app.get('db'),
-    req.params.city,
-    req.params.state,
-    req.params.type
-  ).then(venues => {
-    res.json(venues.map(serializeVenue))
-  })
-  .catch(next)
-});
+  .all(checkSearch)
+  .get((req, res, next) => {
+    VenuesService.getVenuesByCity(
+      req.app.get('db'),
+      req.params.city,
+      req.params.state,
+      req.params.type
+    )
+      .then(venues => {
+        res.json(venues.map(serializeVenue));
+      })
+      .catch(next);
+  });
 
+//Fetches the amenities for a specific venue
 VenuesRouter.route('/:venueId/amenities')
   .all(checkVenue)
   .get((req, res, next) => {
-    VenuesService.getAmenitiesByVenue(
-      req.app.get('db'),
-      req.params.venueId
-    ).then(amenities => {
-      res.json(amenities)
-    })
-    .catch(next)
+    VenuesService.getAmenitiesByVenue(req.app.get('db'), req.params.venueId)
+      .then(amenities => {
+        res.json(amenities);
+      })
+      .catch(next);
   });
 
+//Posts a new venue
+//The venue, review, and reported amenities are passed in the request
+//The information is split and directed to their respective tables in the DB.
 VenuesRouter.route('/addVenue').post(
   requireAuth,
   jsonBodyParser,
@@ -117,7 +121,7 @@ VenuesRouter.route('/addVenue').post(
       price,
       volume,
       starrating,
-      amenities
+      amenities,
     } = req.body;
 
     const newVenue = {
@@ -128,46 +132,39 @@ VenuesRouter.route('/addVenue').post(
       state,
       zipcode,
       phone,
-      url
+      url,
     };
 
-    console.log(newVenue)
+    console.log(newVenue);
 
     const newReview = {
       content,
       price,
       volume,
-      starrating
+      starrating,
     };
 
-    console.log(newVenue)
-
+    console.log(newVenue);
 
     const newAmenities = amenities;
 
-    console.log(newAmenities)
+    console.log(newAmenities);
 
     for (const [key, value] of Object.entries(newVenue))
       if (!value || value === null) {
         return res.status(400).json({ error: `Missing ${key} in request` });
       }
 
-
     for (const [key, value] of Object.entries(newReview))
       if (!value || value === null) {
-        return res
-          .status(400)
-          .json({ error: `Missing ${key} in request` });
+        return res.status(400).json({ error: `Missing ${key} in request` });
       }
 
-
     newReview.user_id = req.user.id;
-
 
     if (!newReview.user_id) {
       return res.status(401).json({ error: 'Unauthorized Request' });
     }
-
 
     let venue = null;
     VenuesService.addVenue(req.app.get('db'), newVenue)
