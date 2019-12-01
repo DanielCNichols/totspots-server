@@ -34,12 +34,13 @@ UserRouter.route('/favorites')
 
     newFavorite.user_id = req.user.id;
 
-    if(!newFavorite.user_id) {
-      return res.status(401).json( {
-        error: `Unauthorized`
+    if (!newFavorite.user_id) {
+      return res.status(401).json({
+        error: `Unauthorized`,
       });
     }
 
+    //for adding and deleting saved venues
     UserService.addFavorite(req.app.get('db'), newFavorite)
       .then(favorite => {
         res.status(200).json(favorite);
@@ -56,7 +57,7 @@ UserRouter.route('/favorites')
 
     if (!delFav.user_id) {
       return res.status(401).json({
-        error: `Unauthorized`
+        error: `Unauthorized`,
       });
     }
 
@@ -67,6 +68,4 @@ UserRouter.route('/favorites')
       .catch(next);
   });
 
-
-
-  module.exports = UserRouter;
+module.exports = UserRouter;

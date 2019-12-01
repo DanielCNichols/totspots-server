@@ -74,6 +74,7 @@ VenuesRouter.route('/profile/:venueId')
       .catch(next);
   });
 
+
 //Retrieves list of results for inital venue search
 VenuesRouter.route('/:city/:state/:type')
   .all(checkSearch)
@@ -102,6 +103,7 @@ VenuesRouter.route('/:venueId/amenities')
   });
 
 //Posts a new venue
+
 //The venue, review, and reported amenities are passed in the request
 //The information is split and directed to their respective tables in the DB.
 VenuesRouter.route('/addVenue').post(
@@ -144,8 +146,6 @@ VenuesRouter.route('/addVenue').post(
       starrating,
     };
 
-    console.log(newVenue);
-
     const newAmenities = amenities;
 
     console.log(newAmenities);
@@ -179,6 +179,7 @@ VenuesRouter.route('/addVenue').post(
         return ReviewsService.addAmenities(req.app.get('db'), newAmenities);
       })
       .then(() => {
+        console.log(venue)
         res.status(201).json(venue);
       })
       .catch(error => {
