@@ -14,10 +14,10 @@ const { CLIENT_ORIGIN } = require('./config');
 const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
 app.use(morgan(morganSetting));
 app.use(helmet());
-app.use(cors()
-  // cors({
-  //   origin: CLIENT_ORIGIN
-  // })
+app.use(
+  cors({
+    origin: CLIENT_ORIGIN,
+  })
 );
 
 app.use('/api/venues', VenuesRouter);
@@ -28,12 +28,12 @@ app.use('/api/users', UserRouter);
 app.use((error, req, res, next) => {
   let response;
   if (process.env.NODE_ENV === 'production') {
-    response = { error: { message: 'server error' }}
+    response = { error: { message: 'server error' } };
   } else {
-    response = { error }
+    response = { error };
   }
-  res.status(500).json(response)
-})
+  res.status(500).json(response);
+});
 
 const PORT = process.env.PORT || 8000;
 
