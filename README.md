@@ -1,3 +1,10 @@
+#### Links
+
+Live app: https://totspots.now.sh/
+
+Client repo: https://github.com/DanielCNichols/totspots-app
+
+
 # Totspots API
 
 Hi! My name is Daniel. Thank you for dropping by the Totspots repo.
