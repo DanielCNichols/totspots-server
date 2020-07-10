@@ -6,6 +6,10 @@ const VenuesRouter = express.Router();
 const jsonBodyParser = express.json();
 const { requireAuth } = require('../middleware/jwt-auth');
 const ReviewsService = require('../reviews/reviews-service');
+const config = require('../config');
+const axios = require('axios');
+const https = require('https');
+const { Console } = require('console');
 
 async function checkVenue(req, res, next) {
   try {
@@ -62,6 +66,50 @@ const serializeVenue = venue => ({
   avgVolume: venue.avgVolume,
 });
 
+//To limit fetching, we are going to grab pretty much everything we have that matches the type, lat, lng, price. Filtering/sorting based on features, rating, etc  will happen on the client side. (Not a fan of this, but I'm not made of money.)
+
+VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
+  try {
+    let {
+      type,
+      lat,
+      lng,
+      tsFilterOpt,
+      features,
+      ratingOpt,
+      priceOpt,
+    } = req.query;
+
+    let venueQuery = `${config.GOOGLE_BASE_URL}?key=${config.GKEY}&location=${lat},${lng}&type=${type}&radius=2000&minprice=${priceOpt}`;
+
+    console.log(venueQuery);
+
+    let { data } = await axios.get(venueQuery);
+    console.log(data);
+    res.json(data);
+    // } else {
+    //   console.log('no prices');
+    // }
+
+    // if (token.length > 1) {
+    //   let venueQuery = `${config.GOOGLE_BASE_URL}?pagetoken=${token}&key=${config.GKEY}`;
+
+    //   let { data } = await axios.get(venueQuery);
+    //   res.json(data);
+    // } else {
+    //   let venueQuery = `${config.GOOGLE_BASE_URL}?key=${config.GKEY}&location=${lat},${lng}&type=${type}&radius=2000`;
+
+    //   let { data } = await axios.get(venueQuery);
+    //   console.log(data);
+
+    //   res.json(data);
+    // }
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+});
+
 //Gets information to build the venue profile
 VenuesRouter.route('/profile/:venueId')
   .all(checkVenue)
@@ -73,7 +121,6 @@ VenuesRouter.route('/profile/:venueId')
       })
       .catch(next);
   });
-
 
 //Retrieves list of results for inital venue search
 VenuesRouter.route('/:city/:state/:type')
@@ -179,7 +226,7 @@ VenuesRouter.route('/addVenue').post(
         return ReviewsService.addAmenities(req.app.get('db'), newAmenities);
       })
       .then(() => {
-        console.log(venue)
+        console.log(venue);
         res.status(201).json(venue);
       })
       .catch(error => {
