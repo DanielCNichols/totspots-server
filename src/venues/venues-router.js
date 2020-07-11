@@ -68,6 +68,8 @@ const serializeVenue = venue => ({
 
 //To limit fetching, we are going to grab pretty much everything we have that matches the type, lat, lng, price. Filtering/sorting based on features, rating, etc  will happen on the client side. (Not a fan of this, but I'm not made of money.)
 
+// ! for Page tokens: ?pagetoken=
+
 VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
   try {
     let {
@@ -78,32 +80,27 @@ VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
       features,
       ratingOpt,
       priceOpt,
+      token,
     } = req.query;
 
-    let venueQuery = `${config.GOOGLE_BASE_URL}?key=${config.GKEY}&location=${lat},${lng}&type=${type}&radius=2000&minprice=${priceOpt}`;
+    //TODO: Refactor this base url to be in the configs
+    let venueQuery = `${config.GOOGLE_BASE_URL}?key=${config.GKEY}`; //Base url
 
-    console.log(venueQuery);
+    //Handle all the params for talking to google. Maybe move this into it's own helper function when this is up and running.
+    if (token) {
+      venueQuery += `&pagetoken=${token}`;
+    } else if (priceOpt) {
+      console.log('filtering by price');
+      venueQuery += `&location=${lat},${lng}&type=${type}&radius=2000&minprice=${priceOpt}`;
+    } else {
+      venueQuery += `&location=${lat},${lng}&type=${type}&radius=2000`;
+    }
 
     let { data } = await axios.get(venueQuery);
-    console.log(data);
+
+    // TODO: Get the relevant info from postgres and match up with google
+    console.log(data.results.length);
     res.json(data);
-    // } else {
-    //   console.log('no prices');
-    // }
-
-    // if (token.length > 1) {
-    //   let venueQuery = `${config.GOOGLE_BASE_URL}?pagetoken=${token}&key=${config.GKEY}`;
-
-    //   let { data } = await axios.get(venueQuery);
-    //   res.json(data);
-    // } else {
-    //   let venueQuery = `${config.GOOGLE_BASE_URL}?key=${config.GKEY}&location=${lat},${lng}&type=${type}&radius=2000`;
-
-    //   let { data } = await axios.get(venueQuery);
-    //   console.log(data);
-
-    //   res.json(data);
-    // }
   } catch (err) {
     console.log(err);
     next(err);
