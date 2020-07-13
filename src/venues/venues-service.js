@@ -32,6 +32,10 @@ const VenuesService = {
       );
   },
 
+  //! This will be used as the initial query for the results page. We will be getting a list of venues from google based on their type.
+  //! We need to get each venue's reviews:[] by their googleId (we can store this as a reference).
+  //! If no totspots user review, return an empty array.
+
   getVenuesByCity(db, city, state, type) {
     return db
       .from('venues')

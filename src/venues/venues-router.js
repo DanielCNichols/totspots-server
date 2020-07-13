@@ -84,22 +84,24 @@ VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
     } = req.query;
 
     //TODO: Refactor this base url to be in the configs
-    let venueQuery = `${config.GOOGLE_BASE_URL}?key=${config.GKEY}`; //Base url
+    // let venueQuery = `${config.GOOGLE_BASE_URL}?key=${config.GKEY}`; //Base url
 
-    //Handle all the params for talking to google. Maybe move this into it's own helper function when this is up and running.
-    if (token) {
-      venueQuery += `&pagetoken=${token}`;
-    } else if (priceOpt) {
-      console.log('filtering by price');
-      venueQuery += `&location=${lat},${lng}&type=${type}&radius=2000&minprice=${priceOpt}`;
-    } else {
-      venueQuery += `&location=${lat},${lng}&type=${type}&radius=2000`;
+    // //Handle all the params for talking to google. Maybe move this into it's own helper function when this is up and running.
+    // if (token) {
+    //   venueQuery += `&pagetoken=${token}`;
+    // } else if (priceOpt) {
+    //   console.log('filtering by price');
+    //   venueQuery += `&location=${lat},${lng}&type=${type}&radius=2000&minprice=${priceOpt}`;
+    // } else {
+    //   venueQuery += `&location=${lat},${lng}&type=${type}&radius=2000`;
     }
 
-    let { data } = await axios.get(venueQuery);
+    // let { data } = await axios.get(venueQuery);
 
     // TODO: Get the relevant info from postgres and match up with google
     console.log(data.results.length);
+  
+  
     res.json(data);
   } catch (err) {
     console.log(err);
