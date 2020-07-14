@@ -10,6 +10,7 @@ const config = require('../config');
 const axios = require('axios');
 const https = require('https');
 const { Console } = require('console');
+const { promises } = require('fs');
 
 async function checkVenue(req, res, next) {
   try {
@@ -66,10 +67,13 @@ const serializeVenue = venue => ({
   avgVolume: venue.avgVolume,
 });
 
-//To limit fetching, we are going to grab pretty much everything we have that matches the type, lat, lng, price. Filtering/sorting based on features, rating, etc  will happen on the client side. (Not a fan of this, but I'm not made of money.)
-
 // ! for Page tokens: ?pagetoken=
 
+//1. Handle the initial call to google (deals with price filtering and next_page)
+//2. Take google's response (20 items) and filter it out based on user filters.
+//3. After we have finished filtering google's data, if there is a remainder, get the TS data for them and append to the entry in the google response
+//4. If not, return an empty results array
+// http://localhost:3000/results/search?type=bar&lat=35.9940329&lng=-78.898619
 VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
   try {
     let {
@@ -83,25 +87,37 @@ VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
       token,
     } = req.query;
 
-    //TODO: Refactor this base url to be in the configs
-    // let venueQuery = `${config.GOOGLE_BASE_URL}?key=${config.GKEY}`; //Base url
+    let venueQuery = `${config.GOOGLE_BASE_URL}?key=${config.GKEY}`; //Base url
 
-    // //Handle all the params for talking to google. Maybe move this into it's own helper function when this is up and running.
-    // if (token) {
-    //   venueQuery += `&pagetoken=${token}`;
-    // } else if (priceOpt) {
-    //   console.log('filtering by price');
-    //   venueQuery += `&location=${lat},${lng}&type=${type}&radius=2000&minprice=${priceOpt}`;
-    // } else {
-    //   venueQuery += `&location=${lat},${lng}&type=${type}&radius=2000`;
+    if (token) {
+      venueQuery += `&pagetoken=${token}`;
+    } else if (priceOpt) {
+      console.log('filtering by price');
+      venueQuery += `&location=${lat},${lng}&type=${type}&radius=2000&minprice=${priceOpt}`;
+    } else {
+      venueQuery += `&location=${lat},${lng}&type=${type}&radius=2000`;
     }
 
-    // let { data } = await axios.get(venueQuery);
+    let { data } = await axios.get(venueQuery);
 
-    // TODO: Get the relevant info from postgres and match up with google
-    console.log(data.results.length);
-  
-  
+    let dbQueries = data.results.map(async entry => {
+      let tsAverages = await VenuesService.getAverages(
+        req.app.get('db'),
+        entry.id
+      );
+      let tsReviews = await VenuesService.getReviewsByVenue(
+        req.app.get('db'),
+        entry.id
+      );
+      let tsAmenities = await VenuesService.getAmenitiesByVenue(
+        req.app.get('db'),
+        entry.id
+      );
+
+      return { ...entry, tsData: { tsAverages, tsReviews, tsAmenities } };
+    });
+
+    data.results = await Promise.all(dbQueries);
     res.json(data);
   } catch (err) {
     console.log(err);
@@ -235,3 +251,5 @@ VenuesRouter.route('/addVenue').post(
 );
 
 module.exports = VenuesRouter;
+
+// let id = '0f5502f218f8da928bd697801a0ae6f0f6e3beab';

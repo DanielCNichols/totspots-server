@@ -33,7 +33,7 @@ const ReviewsService = {
       price: xss(newReview.price),
       volume: xss(newReview.volume),
       starrating: xss(newReview.starrating),
-      user_id: xss(newReview.user_id)
+      user_id: xss(newReview.user_id),
     };
   },
 
@@ -43,17 +43,17 @@ const ReviewsService = {
       .select(
         'reviews.id',
         'reviews.content',
-        'reviews.price',
-        'reviews.starrating',
-        'reviews.volume',
+        // 'reviews.price',
+        // 'reviews.starrating',
+        // 'reviews.volume',
         'reviews.date_created',
-        'reviews.venue_id',
+        // 'reviews.venue_id',
         'reviews.user_id',
         'usr.first_name',
         'usr.last_name'
       )
       .count('votes.votestatus')
-      .where('reviews.venue_id', venue_id)
+      .where('reviews.venueid', venue_id)
       .leftJoin('users AS usr', 'reviews.user_id', 'usr.id')
       .leftJoin('votes', 'reviews.id', 'votes.review_id')
       .groupBy('reviews.id', 'usr.id', 'usr.first_name', 'usr.last_name');
@@ -96,7 +96,6 @@ const ReviewsService = {
       .groupBy('votes.votestatus');
   },
 
-
   postVotes(db, newVote) {
     return db
       .insert(newVote)
@@ -115,7 +114,7 @@ const ReviewsService = {
     return db('reviews')
       .where({ id })
       .update(updatedReview);
-  }
+  },
 };
 
 module.exports = ReviewsService;

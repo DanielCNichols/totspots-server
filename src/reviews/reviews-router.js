@@ -72,24 +72,23 @@ ReviewsRouter.route('/userReviews')
 //Posts a new review to a specific venue.
 //The req.body contains the content of the review and the list of amenities.
 //The review and amenities are split off and posted to their respective tables in the DB.
+//! We are going to update this to take the new venueRatings
 ReviewsRouter.route('/:venueId').post(
-  requireAuth,
+  // requireAuth,
   jsonBodyParser,
   (req, res, next) => {
     const {
       venue_id,
       content,
-      price,
-      volume,
-      starrating,
+      volume_rating,
+      totspots_rating,
       amenities,
     } = req.body;
     const newReview = {
       venue_id,
       content,
-      price,
-      volume,
-      starrating,
+      volume_rating,
+      totspots_rating,
     };
 
     for (const [key, value] of Object.entries(newReview))
@@ -97,7 +96,7 @@ ReviewsRouter.route('/:venueId').post(
         return res.status(400).json({ error: `Missing ${key} in request` });
       }
 
-    newReview.user_id = req.user.id;
+    newReview.user_id = 1; //!fix this later to use the req.user.id
 
     ReviewsService.addReview(req.app.get('db'), newReview)
       .then(review => {

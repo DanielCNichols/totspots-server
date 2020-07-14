@@ -12,7 +12,7 @@ const UserRouter = require('./user/UserRouter');
 const { CLIENT_ORIGIN } = require('./config');
 const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
 
-app.use(morgan());
+app.use(morgan('common'));
 app.use(helmet());
 app.use(
   cors({

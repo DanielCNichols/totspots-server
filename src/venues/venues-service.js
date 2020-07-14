@@ -36,38 +36,26 @@ const VenuesService = {
   //! We need to get each venue's reviews:[] by their googleId (we can store this as a reference).
   //! If no totspots user review, return an empty array.
 
-  getVenuesByCity(db, city, state, type) {
+  //!This query will get the average rating for a venue.
+  //!Need to add amenities and reviews
+  getAverages(db, id) {
     return db
       .from('venues')
       .select(
-        'venues.venue_name',
-        'venues.city',
-        'venues.state',
-        'venues.address',
-        'venues.zipcode',
-        'venues.phone',
-        'venues.url',
-        'venues.venue_type',
-        'venues.id'
+        db.raw('ROUND(AVG(reviews.totspots_rating)) as avgRating'),
+        db.raw('ROUND(AVG(reviews.volume_rating)) as avgVolume')
       )
-      .avg({ avgPrice: 'reviews.price' })
-      .avg({ avgRating: 'reviews.starrating' })
-      .avg({ avgVolume: 'reviews.volume' })
-      .leftJoin('reviews', 'venues.id', '=', 'reviews.venue_id')
-      .where('venues.state', state)
-      .andWhere('venues.city', city)
-      .andWhere('venues.venue_type', type)
-      .groupBy(
-        'venues.venue_name',
-        'venues.city',
-        'venues.state',
-        'venues.address',
-        'venues.zipcode',
-        'venues.venue_type',
-        'venues.url',
-        'venues.phone',
-        'venues.id'
-      );
+      .leftJoin('reviews', 'venues.venue_id', '=', 'reviews.venueid')
+      .where('venues.venue_id', id)
+      .first();
+  },
+
+  //!...not happy doing it this way, but it might work. Try to do this in one query.
+  getReviewsByVenue(db, id) {
+    return db
+      .from('reviews')
+      .select('*')
+      .where('reviews.venueid', id);
   },
 
   addVenue(db, newVenue) {
@@ -80,14 +68,20 @@ const VenuesService = {
       });
   },
 
+  //! updating this to grab appropriate fields
   getAmenitiesByVenue(db, venue_id) {
     return db
       .from('venues')
-      .select('venues.venue_name', 'amenities.amenity_name')
-      .join('amenities_venues', 'venues.id', '=', 'amenities_venues.venue')
+      .select('venues.venue_id', 'amenities.amenity_name')
+      .join(
+        'amenities_venues',
+        'venues.venue_id',
+        '=',
+        'amenities_venues.venueid'
+      )
       .join('amenities', 'amenities_venues.amenity', '=', 'amenities.id')
-      .where('venues.id', venue_id)
-      .groupBy('venues.venue_name', 'amenities.amenity_name');
+      .where('venues.venue_id', venue_id)
+      .groupBy('venues.venue_id', 'amenities.amenity_name', 'amenities.id');
   },
 };
 
