@@ -72,7 +72,7 @@ const VenuesService = {
   getAmenitiesByVenue(db, venue_id) {
     return db
       .from('venues')
-      .select('venues.venue_id', 'amenities.amenity_name')
+      .select('amenities.amenity_name', 'amenities.id')
       .join(
         'amenities_venues',
         'venues.venue_id',
@@ -81,7 +81,7 @@ const VenuesService = {
       )
       .join('amenities', 'amenities_venues.amenity', '=', 'amenities.id')
       .where('venues.venue_id', venue_id)
-      .groupBy('venues.venue_id', 'amenities.amenity_name', 'amenities.id');
+      .groupBy('amenities.amenity_name', 'amenities.id');
   },
 };
 

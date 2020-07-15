@@ -80,9 +80,9 @@ VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
       type,
       lat,
       lng,
-      tsFilterOpt,
+      tsRatingOpt,
+      googleRatingOpt,
       features,
-      ratingOpt,
       priceOpt,
       token,
     } = req.query;
@@ -118,12 +118,57 @@ VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
     });
 
     data.results = await Promise.all(dbQueries);
+
+    //Handle Filters
+    //tsRatingOpt, GoogleRatingopt, features
+    if (tsRatingOpt) {
+      console.log(typeof tsRatingOpt); //string
+      data.results = data.results.filter(
+        venue => venue.tsData.tsAverages.avgrating >= tsRatingOpt
+      );
+    }
+
+    if (googleRatingOpt) {
+      data.results = data.results.filter(
+        venue => venue.rating >= googleRatingOpt
+      );
+    }
+
+    // //! The following filter function works, but you need to have two search values in order to register as an array (this is using features=yeet%features=boosh), otherwise it comes as a string.
+
+    // //TODO: How can we pass a proper array through query string.
+    // //TODO: Make sure string is formatted properly from the results page.
+
+    //features array
+
+    if (features) {
+      let requestedFeatures = features.split(',');
+      data.results = data.results.filter(venue => {
+        let venueFeatures = [];
+        venue.tsData.tsAmenities.forEach(feature => {
+          venueFeatures = [...venueFeatures, ...Object.values(feature)];
+          console.log('these are the venue features', venueFeatures);
+        });
+
+        return featuresChecker(requestedFeatures, venueFeatures) !== false;
+      });
+    }
+
     res.json(data);
   } catch (err) {
     console.log(err);
     next(err);
   }
 });
+
+function featuresChecker(requested, actual) {
+  for (let i = 0; i < requested.length; i++) {
+    if (!actual.includes(requested[i])) {
+      return false;
+    }
+  }
+  return true;
+}
 
 //Gets information to build the venue profile
 VenuesRouter.route('/profile/:venueId')
