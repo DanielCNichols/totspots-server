@@ -32,8 +32,8 @@ const VenuesService = {
       );
   },
 
-  //! This will be used as the initial query for the results page. We will be getting a list of venues from google based on their type.
-  //! We need to get each venue's reviews:[] by their googleId (we can store this as a reference).
+  //! This will be used as the initial query for the results page. We will be getting a list of venes from google based on their type.
+  //! We need to get each vene's reviews:[] by their googleId (we can store this as a reference).
   //! If no totspots user review, return an empty array.
 
   //!This query will get the average rating for a venue.

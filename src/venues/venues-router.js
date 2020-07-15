@@ -52,28 +52,21 @@ async function checkSearch(req, res, next) {
   }
 }
 
-const serializeVenue = venue => ({
-  id: xss(venue.id),
-  venue_name: xss(venue.venue_name),
-  venue_type: xss(venue.venue_type),
-  address: xss(venue.address),
-  city: xss(venue.city),
-  state: xss(venue.state),
-  zipcode: xss(venue.zipcode),
-  phone: xss(venue.phone),
-  url: xss(venue.url),
-  avgRating: venue.avgRating,
-  avgPrice: venue.avgPrice,
-  avgVolume: venue.avgVolume,
-});
-
-// ! for Page tokens: ?pagetoken=
-
-//1. Handle the initial call to google (deals with price filtering and next_page)
-//2. Take google's response (20 items) and filter it out based on user filters.
-//3. After we have finished filtering google's data, if there is a remainder, get the TS data for them and append to the entry in the google response
-//4. If not, return an empty results array
-// http://localhost:3000/results/search?type=bar&lat=35.9940329&lng=-78.898619
+//!
+// const serializeVenue = venue => ({
+//   id: xss(venue.id),
+//   venue_name: xss(venue.venue_name),
+//   venue_type: xss(venue.venue_type),
+//   address: xss(venue.address),
+//   city: xss(venue.city),
+//   state: xss(venue.state),
+//   zipcode: xss(venue.zipcode),
+//   phone: xss(venue.phone),
+//   url: xss(venue.url),
+//   avgRating: venue.avgRating,
+//   avgPrice: venue.avgPrice,
+//   avgVolume: venue.avgVolume,
+// });
 VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
   try {
     let {
@@ -89,6 +82,7 @@ VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
 
     let venueQuery = `${config.GOOGLE_BASE_URL}?key=${config.GKEY}`; //Base url
 
+    //ToDO: Refactor this into a helper function and use the URLSearchParams().
     if (token) {
       venueQuery += `&pagetoken=${token}`;
     } else if (priceOpt) {
@@ -134,13 +128,7 @@ VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
       );
     }
 
-    // //! The following filter function works, but you need to have two search values in order to register as an array (this is using features=yeet%features=boosh), otherwise it comes as a string.
-
-    // //TODO: How can we pass a proper array through query string.
-    // //TODO: Make sure string is formatted properly from the results page.
-
-    //features array
-
+    //TODO: I think this can be cleaned up and abstracted away.
     if (features) {
       let requestedFeatures = features.split(',');
       data.results = data.results.filter(venue => {
