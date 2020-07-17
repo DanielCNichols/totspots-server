@@ -31,6 +31,7 @@ async function checkVenue(req, res, next) {
   }
 }
 
+//! take a look at this one
 async function checkSearch(req, res, next) {
   try {
     const venue = await VenuesService.getVenuesByCity(
@@ -67,7 +68,8 @@ async function checkSearch(req, res, next) {
 //   avgPrice: venue.avgPrice,
 //   avgVolume: venue.avgVolume,
 // });
-VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
+
+VenuesRouter.route('/?').get(async (req, res, next) => {
   try {
     let {
       type,
@@ -113,8 +115,6 @@ VenuesRouter.route('/?').get(jsonBodyParser, async (req, res, next) => {
 
     data.results = await Promise.all(dbQueries);
 
-    //Handle Filters
-    //tsRatingOpt, GoogleRatingopt, features
     if (tsRatingOpt) {
       console.log(typeof tsRatingOpt); //string
       data.results = data.results.filter(
@@ -158,34 +158,31 @@ function featuresChecker(requested, actual) {
   return true;
 }
 
+//! Refactor this to get the information for a single place from google
+//! THis logic works, but need to update the totspots seed files to store the place_id, not the id returned in nearby places search. No biggie. For now, hardcode id into db queries. Don't forget to get it out later.
 //Gets information to build the venue profile
-VenuesRouter.route('/profile/:venueId')
-  .all(checkVenue)
-  .get((req, res, next) => {
-    console.log(req.params);
-    VenuesService.getVenueById(req.app.get('db'), req.params.venueId)
-      .then(venue => {
-        res.json(venue);
-      })
-      .catch(next);
-  });
+VenuesRouter.route('/:placeId').get(async (req, res, next) => {
+  let { placeId } = req.params;
+  let venueQuery = `${config.GOOGLE_DETAIL_URL}?place_id=${placeId}&fields=name,formatted_address,id,geometry,name,photo,place_id,type,url,vicinity,formatted_phone_number,opening_hours,website,price_level,rating,review,user_ratings_total&key=${config.GKEY}`;
 
-//Retrieves list of results for inital venue search
-VenuesRouter.route('/:city/:state/:type')
-  .all(checkSearch)
-  .get((req, res, next) => {
-    VenuesService.getVenuesByCity(
-      req.app.get('db'),
-      req.params.city,
-      req.params.state,
-      req.params.type
-    )
-      .then(venues => {
-        res.json(venues.map(serializeVenue));
-      })
-      .catch(next);
-  });
+  let { data } = await axios.get(venueQuery);
 
+  // Get the reviews, etc
+  let id = '0f5502f218f8da928bd697801a0ae6f0f6e3beab'; //! This is the one. Should be something like "ChIJh3eRD27krIkRpG-tTJnXAf8"
+  let dbQueries = [
+    VenuesService.getAmenitiesByVenue(req.app.get('db'), id),
+    VenuesService.getReviewsAndVotes(req.app.get('db'), id),
+  ];
+
+  let [amenities, tsReviews] = await Promise.all(dbQueries);
+
+  data.amenities = amenities;
+  data.tsReviews = tsReviews;
+
+  res.send(data);
+});
+
+//! This is going to be obsolete, most likely.
 //Fetches the amenities for a specific venue
 VenuesRouter.route('/:venueId/amenities')
   .all(checkVenue)
@@ -199,6 +196,7 @@ VenuesRouter.route('/:venueId/amenities')
 
 //Posts a new venue
 
+//! Largely obsolete.
 //The venue, review, and reported amenities are passed in the request
 //The information is split and directed to their respective tables in the DB.
 VenuesRouter.route('/addVenue').post(

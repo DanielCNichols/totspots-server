@@ -11,4 +11,5 @@ module.exports = {
   GKEY: process.env.GKEY || 'key',
   GOOGLE_BASE_URL:
     'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
+  GOOGLE_DETAIL_URL: 'https://maps.googleapis.com/maps/api/place/details/json',
 };

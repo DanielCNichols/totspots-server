@@ -68,6 +68,29 @@ const VenuesService = {
       });
   },
 
+  //!This gets the reviews for a specific venue
+
+  getReviewsAndVotes(db, venue_id) {
+    return db
+      .from('reviews')
+      .select(
+        'reviews.id',
+        'reviews.content',
+        'reviews.totspots_rating',
+        'reviews.volume_rating',
+        'reviews.date_created',
+        'reviews.venueid',
+        'reviews.user_id',
+        'usr.first_name',
+        'usr.last_name'
+      )
+      .count('votes.votestatus')
+      .where('reviews.venueid', venue_id)
+      .leftJoin('users AS usr', 'reviews.user_id', 'usr.id')
+      .leftJoin('votes', 'reviews.id', 'votes.review_id')
+      .groupBy('reviews.id', 'usr.id', 'usr.first_name', 'usr.last_name');
+  },
+
   //! updating this to grab appropriate fields
   getAmenitiesByVenue(db, venue_id) {
     return db
