@@ -158,28 +158,35 @@ function featuresChecker(requested, actual) {
   return true;
 }
 
-//! Refactor this to get the information for a single place from google
-//! THis logic works, but need to update the totspots seed files to store the place_id, not the id returned in nearby places search. No biggie. For now, hardcode id into db queries. Don't forget to get it out later.
 //Gets information to build the venue profile
 VenuesRouter.route('/:placeId').get(async (req, res, next) => {
-  let { placeId } = req.params;
-  let venueQuery = `${config.GOOGLE_DETAIL_URL}?place_id=${placeId}&fields=name,formatted_address,id,geometry,name,photo,place_id,type,url,vicinity,formatted_phone_number,opening_hours,website,price_level,rating,review,user_ratings_total&key=${config.GKEY}`;
+  try {
+    let { placeId } = req.params;
+    let venueQuery = `${config.GOOGLE_DETAIL_URL}?place_id=${placeId}&fields=name,formatted_address,id,geometry,name,photo,place_id,type,url,vicinity,formatted_phone_number,opening_hours,website,price_level,rating,review,user_ratings_total&key=${config.GKEY}`;
 
-  let { data } = await axios.get(venueQuery);
+    let { data } = await axios.get(venueQuery);
 
-  // Get the reviews, etc
-  let id = '0f5502f218f8da928bd697801a0ae6f0f6e3beab'; //! This is the one. Should be something like "ChIJh3eRD27krIkRpG-tTJnXAf8"
-  let dbQueries = [
-    VenuesService.getAmenitiesByVenue(req.app.get('db'), id),
-    VenuesService.getReviewsAndVotes(req.app.get('db'), id),
-  ];
+    let dbQueries = [
+      VenuesService.getAmenitiesByVenue(
+        req.app.get('db'),
+        data.result.place_id
+      ),
+      VenuesService.getReviewsAndVotes(req.app.get('db'), data.result.place_id),
+      VenuesService.getAverages(req.app.get('db'), data.result.place_id),
+    ];
 
-  let [amenities, tsReviews] = await Promise.all(dbQueries);
+    let [amenities, tsReviews, tsAverages] = await Promise.all(dbQueries);
 
-  data.amenities = amenities;
-  data.tsReviews = tsReviews;
+    data.amenities = amenities;
+    data.tsReviews = tsReviews;
+    data.tsAverages = tsAverages;
 
-  res.send(data);
+    console.log(data.place_id);
+
+    res.send(data);
+  } catch (error) {
+    next(error);
+  }
 });
 
 //! This is going to be obsolete, most likely.

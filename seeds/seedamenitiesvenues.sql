@@ -5,13 +5,13 @@ BEGIN;
   insert into amenities_venues
     (amenity, venueid)
   values
-    (2, '0f5502f218f8da928bd697801a0ae6f0f6e3beab');
+    (2, 'ChIJh3eRD27krIkRpG-tTJnXAf8');
   insert into amenities_venues
     (amenity, venueid)
   values
-    (4, '0f5502f218f8da928bd697801a0ae6f0f6e3beab');
+    (4, 'ChIJh3eRD27krIkRpG-tTJnXAf8');
   insert into amenities_venues
     (amenity, venueid)
-  values(5, '0f5502f218f8da928bd697801a0ae6f0f6e3beab');
+  values(5, 'ChIJh3eRD27krIkRpG-tTJnXAf8');
 END;
 COMMIT;

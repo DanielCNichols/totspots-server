@@ -1,19 +1,19 @@
 insert into reviews
   ( venueId, content, volume_rating, totspots_rating, user_id)
 values
-  ('0f5502f218f8da928bd697801a0ae6f0f6e3beab', 'We love this place! The perfect spot to take your kids on a Friday afternoon after work!', 5, 4, 2);
+  ('ChIJh3eRD27krIkRpG-tTJnXAf8', 'We love this place! The perfect spot to take your kids on a Friday afternoon after work!', 5, 4, 2);
 insert into reviews
   ( venueId, content, volume_rating, totspots_rating, user_id)
 values
-  ('0f5502f218f8da928bd697801a0ae6f0f6e3beab', 'I do all my work here. The staff is awesome and the coffee is amazing. A little tight, so maybe not the best for infants, IMHO', 1, 4, 5);
+  ('ChIJh3eRD27krIkRpG-tTJnXAf8', 'I do all my work here. The staff is awesome and the coffee is amazing. A little tight, so maybe not the best for infants, IMHO', 1, 4, 5);
 insert into reviews
   ( venueId, content, volume_rating, totspots_rating, user_id)
 values
-  ('0f5502f218f8da928bd697801a0ae6f0f6e3beab', 'Hands down the best place to get a quick breakfast with your family in the city. A family of four can eat for under 15 bucks! Easy to get a stroller in here, and they have an awesome changing table. Skip the rest, you wanna go to Early Bird.', 1, 5, 7);
+  ('ChIJh3eRD27krIkRpG-tTJnXAf8', 'Hands down the best place to get a quick breakfast with your family in the city. A family of four can eat for under 15 bucks! Easy to get a stroller in here, and they have an awesome changing table. Skip the rest, you wanna go to Early Bird.', 1, 5, 7);
 insert into reviews
   ( venueId, content, volume_rating, totspots_rating, user_id)
 values
-  ('0f5502f218f8da928bd697801a0ae6f0f6e3beab', 'The food is good, but not the best place to take your kids. Can be tight, and the prices are more in line with trendy new Durham spots. Maybe save it for a date night.', 4, 3, 14);
+  ('ChIJh3eRD27krIkRpG-tTJnXAf8', 'The food is good, but not the best place to take your kids. Can be tight, and the prices are more in line with trendy new Durham spots. Maybe save it for a date night.', 4, 3, 14);
 -- insert into reviews  ( venueId, content,  volume_rating, totspots_rating, user_id) values (2, 'A classic around here. Museum features a ton of interactive exhibits and outdoor play areas as well. You can get yearlong memberships that get you into other NC museums as well.', 2, 3, 5, 13);
 -- insert into reviews  ( venueId, content,  volume_rating, totspots_rating, user_id) values (14, 'It might not look like it from the outside, but this is a great place to have a familiy dinner. Ample space for strollers. Get the moules frites!', 4, 3, 5, 11);
 -- insert into reviews  ( venueId, content,  volume_rating, totspots_rating, user_id) values (13, 'Cool spot and the food is great. New parents be aware that this is a pretty tight space, so you might want to leave the stroller.', 1, 1, 2, 8);

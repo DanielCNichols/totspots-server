@@ -8,7 +8,7 @@ CASCADE;
 INSERT INTO venues
   (venue_id)
 VALUES
-  ('0f5502f218f8da928bd697801a0ae6f0f6e3beab');
+  ('ChIJh3eRD27krIkRpG-tTJnXAf8');
 -- ('Museum of Life and Science', 'education', '433 W. Murray Ave', 'durham', 'nc', 27704, 'https://www.lifeandscience.org', 9192205429)
 -- ,
 -- ('Bond Brothers', 'bar', '202 East Cedar St.', 'cary', 'nc', 25247, 'https://www.bondbrothersbeer.com/', 9194592670),
