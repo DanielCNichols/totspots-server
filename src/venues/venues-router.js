@@ -181,8 +181,6 @@ VenuesRouter.route('/:placeId').get(async (req, res, next) => {
     data.tsReviews = tsReviews;
     data.tsAverages = tsAverages;
 
-    console.log(data.place_id);
-
     res.send(data);
   } catch (error) {
     next(error);

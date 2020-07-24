@@ -25,15 +25,6 @@ async function checkReview(req, res, next) {
   }
 }
 
-//Gathers all of the reviews for a single venue, to be used on the reviews page.
-ReviewsRouter.route('/venues/:venueId/').get((req, res) => {
-  ReviewsService.getReviewsByVenue(req.app.get('db'), req.params.venueId).then(
-    reviews => {
-      res.json(reviews);
-    }
-  );
-});
-
 //Retrieves and posts votes for reviews.
 //Requires a review id.
 ReviewsRouter.route('/:reviewId/votes')
@@ -69,45 +60,45 @@ ReviewsRouter.route('/userReviews')
       .catch(next);
   });
 
-//Posts a new review to a specific venue.
-//The req.body contains the content of the review and the list of amenities.
-//The review and amenities are split off and posted to their respective tables in the DB.
-//! We are going to update this to take the new venueRatings
 ReviewsRouter.route('/:venueId').post(
-  // requireAuth,
+  requireAuth,
   jsonBodyParser,
-  (req, res, next) => {
-    const {
-      venue_id,
-      content,
-      volume_rating,
-      totspots_rating,
-      amenities,
-    } = req.body;
-    const newReview = {
-      venue_id,
-      content,
-      volume_rating,
-      totspots_rating,
-    };
+  async (req, res, next) => {
+    try {
+      let { review } = req.body;
+      let { venueId } = req.params;
 
-    for (const [key, value] of Object.entries(newReview))
-      if (!value || value === null) {
-        return res.status(400).json({ error: `Missing ${key} in request` });
+      //Required fields are volume and rating.
+      if (!review.totspots_rating || !review.volume_rating) {
+        return res
+          .status(400)
+          .json({ error: `Rating and volume level are required` });
       }
 
-    newReview.user_id = 1; //!fix this later to use the req.user.id
+      const { amenities, ...newReview } = review; //Cool destructuring!
+      console.log(newReview);
 
-    ReviewsService.addReview(req.app.get('db'), newReview)
-      .then(review => {
-        ReviewsService.addAmenities(req.app.get('db'), amenities).then(() => {
-          res
-            .status(201)
-            .location(path.posix.join(req.originalUrl, `/${review.id}`))
-            .json(ReviewsService.serializeReview(review));
-        });
-      })
-      .catch(next);
+      newReview.userId = req.user.id;
+      newReview.venueid = venueId;
+
+      let amenitiesToInsert = amenities.map(amenity => {
+        return { venueid: venueId, amenity: amenity };
+      });
+
+      //Handle it at one time..
+
+      console.log(amenitiesToInsert);
+      let dbInserts = [
+        ReviewsService.addReview(req.app.get('db'), newReview),
+        ReviewsService.addAmenities(req.app.get('db'), amenitiesToInsert),
+      ];
+
+      let result = await Promise.all(dbInserts);
+
+      res.send(result);
+    } catch (err) {
+      next(err);
+    }
   }
 );
 
