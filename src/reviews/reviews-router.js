@@ -61,7 +61,7 @@ ReviewsRouter.route('/userReviews')
   });
 
 ReviewsRouter.route('/')
-  // .all(requireAuth)
+  .all(requireAuth)
   .post(jsonBodyParser, async (req, res, next) => {
     try {
       let { review } = req.body;
@@ -76,8 +76,7 @@ ReviewsRouter.route('/')
 
       const { amenities, venueId, ...newReview } = review; //Cool destructuring!
 
-      // newReview.user_id = req.user.id;
-      newReview.user_id = 1;
+      newReview.user_id = req.user.id;
       newReview.venueid = venueId;
 
       // add the venueId to each of the amenities before inserting
