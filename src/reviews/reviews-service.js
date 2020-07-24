@@ -62,29 +62,34 @@ const ReviewsService = {
   getUserReviews(db, id) {
     return db
       .from('reviews')
-      .select(
-        'reviews.id',
-        'reviews.content',
-        'reviews.price',
-        'reviews.starrating',
-        'reviews.volume',
-        'reviews.date_created',
-        'reviews.venue_id',
-        'venues.venue_name'
-      )
-      .join('users', 'reviews.user_id', '=', 'users.id')
-      .join('venues', 'reviews.venue_id', '=', 'venues.id')
-      .where('users.id', id)
-      .groupBy(
-        'reviews.id',
-        'reviews.content',
-        'reviews.price',
-        'reviews.starrating',
-        'reviews.volume',
-        'reviews.date_created',
-        'reviews.venue_id',
-        'venues.venue_name'
-      );
+      .select('*')
+      .where('reviews.user_id', id);
+
+    // return db
+    //   .from('reviews')
+    //   .select(
+    //     'reviews.id',
+    //     'reviews.content',
+    //     'reviews.price',
+    //     'reviews.starrating',
+    //     'reviews.volume',
+    //     'reviews.date_created',
+    //     'reviews.venue_id',
+    //     'venues.venue_name'
+    //   )
+    //   .join('users', 'reviews.user_id', '=', 'users.id')
+    //   .join('venues', 'reviews.venue_id', '=', 'venues.id')
+    //   .where('users.id', id)
+    //   .groupBy(
+    //     'reviews.id',
+    //     'reviews.content',
+    //     'reviews.price',
+    //     'reviews.starrating',
+    //     'reviews.volume',
+    //     'reviews.date_created',
+    //     'reviews.venue_id',
+    //     'venues.venue_name'
+    //   );
   },
 
   getVotesByReview(db, reviewId) {

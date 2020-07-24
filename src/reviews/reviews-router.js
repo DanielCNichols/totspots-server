@@ -2,6 +2,8 @@ const express = require('express');
 const ReviewsService = require('./reviews-service');
 const path = require('path');
 const { requireAuth } = require('../middleware/jwt-auth');
+const axios = require('axios');
+const config = require('../config');
 
 const ReviewsRouter = express.Router();
 const jsonBodyParser = express.json();
@@ -25,6 +27,7 @@ async function checkReview(req, res, next) {
   }
 }
 
+//! Obsolete?
 //Retrieves and posts votes for reviews.
 //Requires a review id.
 ReviewsRouter.route('/:reviewId/votes')
@@ -50,14 +53,36 @@ ReviewsRouter.route('/:reviewId/votes')
   });
 
 //Gathers the user's review history to populate the user profile page.
+
+//! We will need to get the review, and then use the venueid to grab the basic inforamation from google.
 ReviewsRouter.route('/userReviews')
-  .all(requireAuth)
-  .get(requireAuth, (req, res, next) => {
-    ReviewsService.getUserReviews(req.app.get('db'), req.user.id)
-      .then(profile => {
-        res.json(profile);
-      })
-      .catch(next);
+  // .all(requireAuth)
+  .get(async (req, res, next) => {
+    try {
+      let reviews = await ReviewsService.getUserReviews(req.app.get('db'), 1);
+
+      //Got the reviews, now iterate and grab venue info.
+      let requests = reviews.map(review => {
+        console.log('here');
+        let query = `${config.GOOGLE_DETAIL_URL}?place_id=${review.venueid}&fields=name,geometry,business_status,photo,type,url,vicinity&key=${config.GKEY}`;
+        return axios.get(query);
+      });
+
+      let results = await Promise.all(requests);
+
+      let venues = results.map(result => {
+        return result.data;
+      });
+
+      //Hmm...
+      let complete = reviews.map((review, idx) => {
+        return { ...review, ...venues[idx] };
+      });
+
+      res.send(complete);
+    } catch (err) {
+      next(err);
+    }
   });
 
 ReviewsRouter.route('/')
