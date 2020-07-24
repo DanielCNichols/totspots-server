@@ -60,13 +60,12 @@ ReviewsRouter.route('/userReviews')
       .catch(next);
   });
 
-ReviewsRouter.route('/:venueId').post(
-  requireAuth,
-  jsonBodyParser,
-  async (req, res, next) => {
+ReviewsRouter.route('/')
+  // .all(requireAuth)
+  .post(jsonBodyParser, async (req, res, next) => {
     try {
       let { review } = req.body;
-      let { venueId } = req.params;
+      console.log('here');
 
       //Required fields are volume and rating.
       if (!review.totspots_rating || !review.volume_rating) {
@@ -75,19 +74,18 @@ ReviewsRouter.route('/:venueId').post(
           .json({ error: `Rating and volume level are required` });
       }
 
-      const { amenities, ...newReview } = review; //Cool destructuring!
-      console.log(newReview);
+      const { amenities, venueId, ...newReview } = review; //Cool destructuring!
 
-      newReview.userId = req.user.id;
+      // newReview.user_id = req.user.id;
+      newReview.user_id = 1;
       newReview.venueid = venueId;
 
+      // add the venueId to each of the amenities before inserting
       let amenitiesToInsert = amenities.map(amenity => {
         return { venueid: venueId, amenity: amenity };
       });
 
-      //Handle it at one time..
-
-      console.log(amenitiesToInsert);
+      // Handle it at one time..
       let dbInserts = [
         ReviewsService.addReview(req.app.get('db'), newReview),
         ReviewsService.addAmenities(req.app.get('db'), amenitiesToInsert),
@@ -99,48 +97,37 @@ ReviewsRouter.route('/:venueId').post(
     } catch (err) {
       next(err);
     }
-  }
-);
-
-//delete/edit reviews
-ReviewsRouter.route('/users/venues/:reviewId')
-  .all(checkReview)
-  .get((req, res, next) => {
-    ReviewsService.getReviewById(req.app.get('db'), req.params.reviewId)
-      .then(reviews => {
-        res.json(reviews);
-      })
-      .catch(next);
   })
-  .delete((req, res, next) => {
-    ReviewsService.deleteReview(req.app.get('db'), req.params.reviewId)
-      .then(() => {
-        res.status(204).end();
-      })
-      .catch(next);
-  })
-  .patch(jsonBodyParser, (req, res, next) => {
-    const { content, starrating, price, volume } = req.body;
-    const updatedReview = { content, starrating, price, volume };
-
-    const numberOfValues = Object.values(updatedReview).filter(Boolean).length;
-    if (numberOfValues === 0) {
-      return res.status(400).json({
-        error: {
-          message: `Request must contain content, rating, price, or volume`,
-        },
-      });
+  .delete(jsonBodyParser, async (req, res, next) => {
+    try {
+      let { id } = req.body;
+      //Todo: Need to check to see if the review actually exists!
+      await ReviewsService.deleteReview(req.app.get('db'), id);
+      res.status(204).end();
+    } catch (err) {
+      next(err);
     }
+  })
+  .patch(jsonBodyParser, async (req, res, next) => {
+    try {
+      let { review } = req.body;
 
-    ReviewsService.updateReview(
-      req.app.get('db'),
-      req.params.reviewId,
-      updatedReview
-    )
-      .then(numRowsAffected => {
-        res.status(204).end();
-      })
-      .catch(next);
+      if (!review.totspots_rating || !review.volume_rating) {
+        return res
+          .status(400)
+          .json({ error: 'Rating and volume level are required' });
+      }
+
+      let updated = await ReviewsService.updateReview(
+        req.app.get('db'),
+        review.id,
+        review
+      );
+
+      res.send(updated);
+    } catch (err) {
+      next(err);
+    }
   });
 
 module.exports = ReviewsRouter;

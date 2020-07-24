@@ -113,7 +113,8 @@ const ReviewsService = {
   updateReview(db, id, updatedReview) {
     return db('reviews')
       .where({ id })
-      .update(updatedReview);
+      .update(updatedReview)
+      .returning('*');
   },
 };
 
