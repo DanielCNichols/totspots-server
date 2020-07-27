@@ -10,11 +10,32 @@ const ReviewsService = {
       .first();
   },
 
+  getNewReview(db, reviewId) {
+    console.log('getting review', reviewId);
+    return db
+      .from('reviews')
+      .select(
+        'reviews.id',
+        'reviews.content',
+        'reviews.volume_rating',
+        'reviews.date_created',
+        'reviews.totspots_rating',
+        'reviews.venueid',
+        'reviews.user_id',
+        'usr.first_name',
+        'usr.last_name'
+      )
+      .where('reviews.id', reviewId)
+      .leftJoin('users AS usr', 'reviews.user_id', 'usr.id')
+      .groupBy('reviews.id', 'usr.id', 'usr.first_name', 'usr.last_name')
+      .first();
+  },
+
   addReview(db, newReview) {
     return db
       .insert(newReview)
       .into('reviews')
-      .returning('*')
+      .returning('id')
       .then(([Review]) => Review);
   },
 
@@ -64,32 +85,6 @@ const ReviewsService = {
       .from('reviews')
       .select('*')
       .where('reviews.user_id', id);
-
-    // return db
-    //   .from('reviews')
-    //   .select(
-    //     'reviews.id',
-    //     'reviews.content',
-    //     'reviews.price',
-    //     'reviews.starrating',
-    //     'reviews.volume',
-    //     'reviews.date_created',
-    //     'reviews.venue_id',
-    //     'venues.venue_name'
-    //   )
-    //   .join('users', 'reviews.user_id', '=', 'users.id')
-    //   .join('venues', 'reviews.venue_id', '=', 'venues.id')
-    //   .where('users.id', id)
-    //   .groupBy(
-    //     'reviews.id',
-    //     'reviews.content',
-    //     'reviews.price',
-    //     'reviews.starrating',
-    //     'reviews.volume',
-    //     'reviews.date_created',
-    //     'reviews.venue_id',
-    //     'venues.venue_name'
-    //   );
   },
 
   getVotesByReview(db, reviewId) {

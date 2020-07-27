@@ -52,18 +52,15 @@ ReviewsRouter.route('/:reviewId/votes')
       .catch(next);
   });
 
-//Gathers the user's review history to populate the user profile page.
-
-//! We will need to get the review, and then use the venueid to grab the basic inforamation from google.
+//!Keep!
 ReviewsRouter.route('/userReviews')
-  // .all(requireAuth)
+  .all(requireAuth)
   .get(async (req, res, next) => {
     try {
       let reviews = await ReviewsService.getUserReviews(req.app.get('db'), 1);
 
       //Got the reviews, now iterate and grab venue info.
       let requests = reviews.map(review => {
-        console.log('here');
         let query = `${config.GOOGLE_DETAIL_URL}?place_id=${review.venueid}&fields=name,geometry,business_status,photo,type,url,vicinity&key=${config.GKEY}`;
         return axios.get(query);
       });
@@ -85,19 +82,21 @@ ReviewsRouter.route('/userReviews')
     }
   });
 
+//*Keep!
 ReviewsRouter.route('/')
   .all(requireAuth)
   .post(jsonBodyParser, async (req, res, next) => {
+    console.log('in the route');
     try {
       let { review } = req.body;
-      console.log('here');
-
       //Required fields are volume and rating.
       if (!review.totspots_rating || !review.volume_rating) {
         return res
           .status(400)
           .json({ error: `Rating and volume level are required` });
       }
+
+      console.log(review);
 
       const { amenities, venueId, ...newReview } = review; //Cool destructuring!
 
@@ -115,7 +114,9 @@ ReviewsRouter.route('/')
         ReviewsService.addAmenities(req.app.get('db'), amenitiesToInsert),
       ];
 
-      let result = await Promise.all(dbInserts);
+      let [id] = await Promise.all(dbInserts);
+
+      let result = await ReviewsService.getNewReview(req.app.get('db'), id);
 
       res.send(result);
     } catch (err) {
