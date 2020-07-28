@@ -87,6 +87,13 @@ const ReviewsService = {
       .where('reviews.user_id', id);
   },
 
+  getFavorites(db, id) {
+    return db
+      .from('favorites')
+      .select('venueid')
+      .where('favorites.user_id', id);
+  },
+
   getVotesByReview(db, reviewId) {
     return db
       .count('votestatus')
@@ -116,10 +123,6 @@ const ReviewsService = {
       .update(updatedReview)
       .returning('*');
   },
-
-  //! Get favorite boolean
-
-  // user_id, venueid favorites
 };
 
 module.exports = ReviewsService;

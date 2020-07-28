@@ -102,36 +102,6 @@ const UserService = {
       );
   },
 
-  getFavorites(db, id) {
-    return db
-      .from('users')
-      .select(
-        'venues.venue_name',
-        'venues.city',
-        'venues.state',
-        'venues.address',
-        'venues.zipcode',
-        'venues.venue_type',
-        'venues.id',
-        'venues.url',
-        'venues.phone'
-      )
-      .join('users_favorites', 'users.id', '=', 'users_favorites.user_id')
-      .join('venues', 'users_favorites.venue_id', '=', 'venues.id')
-      .where('users_favorites.user_id', id)
-      .groupBy(
-        'venues.venue_name',
-        'venues.city',
-        'venues.state',
-        'venues.address',
-        'venues.zipcode',
-        'venues.venue_type',
-        'venues.id',
-        'venues.url',
-        'venues.phone'
-      );
-  },
-
   getUserReviews(db, id) {
     return db
       .from('reviews')

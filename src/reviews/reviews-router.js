@@ -52,31 +52,55 @@ ReviewsRouter.route('/:reviewId/votes')
       .catch(next);
   });
 
-//!Keep!
+//It works, but strip out all this duplicate action into a helper function.
+//This is an expensive page to load.
 ReviewsRouter.route('/userReviews')
   .all(requireAuth)
   .get(async (req, res, next) => {
     try {
-      let reviews = await ReviewsService.getUserReviews(req.app.get('db'), 1);
+      let dbQueries = [
+        ReviewsService.getUserReviews(req.app.get('db'), req.user.id),
+        ReviewsService.getFavorites(req.app.get('db'), req.user.id),
+      ];
+
+      let [reviews, favorites] = await Promise.all(dbQueries);
 
       //Got the reviews, now iterate and grab venue info.
-      let requests = reviews.map(review => {
-        let query = `${config.GOOGLE_DETAIL_URL}?place_id=${review.venueid}&fields=name,geometry,business_status,photo,type,url,vicinity&key=${config.GKEY}`;
+      let reviewRequests = reviews.map(review => {
+        let query = `${config.GOOGLE_DETAIL_URL}?place_id=${review.venueid}&fields=name,type,url,vicinity,website,formatted_phone_number,rating,price_level&key=${config.GKEY}`;
         return axios.get(query);
       });
 
-      let results = await Promise.all(requests);
+      let favoriteRequests = favorites.map(favorite => {
+        let query = `${config.GOOGLE_DETAIL_URL}?place_id=${favorite.venueid}&fields=name,type,url,vicinity,website,formatted_phone_number,rating,price_level&key=${config.GKEY}`;
+        return axios.get(query);
+      });
 
-      let venues = results.map(result => {
+      let reviewResults = await Promise.all(reviewRequests);
+      let favoriteResults = await Promise.all(favoriteRequests);
+
+      let reviewVenues = reviewResults.map(result => {
         return result.data;
       });
 
-      //Hmm...
-      let complete = reviews.map((review, idx) => {
-        return { ...review, ...venues[idx] };
+      let favoriteVenues = favoriteResults.map(result => {
+        return result.data;
       });
 
-      res.send(complete);
+      reviews = reviews.map((review, idx) => {
+        return { ...review, ...reviewVenues[idx] };
+      });
+
+      favorites = favorites.map((favorite, idx) => {
+        return { ...favorite, ...favoriteVenues[idx] };
+      });
+
+      let results = {
+        reviews,
+        favorites,
+      };
+
+      res.send(results);
     } catch (err) {
       next(err);
     }
