@@ -86,7 +86,6 @@ ReviewsRouter.route('/userReviews')
 ReviewsRouter.route('/')
   .all(requireAuth)
   .post(jsonBodyParser, async (req, res, next) => {
-    console.log('in the route');
     try {
       let { review } = req.body;
       //Required fields are volume and rating.
@@ -95,8 +94,6 @@ ReviewsRouter.route('/')
           .status(400)
           .json({ error: `Rating and volume level are required` });
       }
-
-      console.log(review);
 
       const { amenities, venueId, ...newReview } = review; //Cool destructuring!
 

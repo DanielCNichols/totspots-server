@@ -116,6 +116,10 @@ const ReviewsService = {
       .update(updatedReview)
       .returning('*');
   },
+
+  //! Get favorite boolean
+
+  // user_id, venueid favorites
 };
 
 module.exports = ReviewsService;

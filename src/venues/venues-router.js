@@ -4,7 +4,7 @@ const path = require('path');
 const xss = require('xss');
 const VenuesRouter = express.Router();
 const jsonBodyParser = express.json();
-const { requireAuth } = require('../middleware/jwt-auth');
+const { requireAuth, checkedLoggedIn } = require('../middleware/jwt-auth');
 const ReviewsService = require('../reviews/reviews-service');
 const config = require('../config');
 const axios = require('axios');
@@ -135,7 +135,6 @@ VenuesRouter.route('/?').get(async (req, res, next) => {
         let venueFeatures = [];
         venue.tsData.tsAmenities.forEach(feature => {
           venueFeatures = [...venueFeatures, ...Object.values(feature)];
-          console.log('these are the venue features', venueFeatures);
         });
 
         return featuresChecker(requestedFeatures, venueFeatures) !== false;
@@ -159,33 +158,71 @@ function featuresChecker(requested, actual) {
 }
 
 //Gets information to build the venue profile
-VenuesRouter.route('/:placeId').get(async (req, res, next) => {
-  try {
-    let { placeId } = req.params;
-    let venueQuery = `${config.GOOGLE_DETAIL_URL}?place_id=${placeId}&fields=name,formatted_address,id,geometry,name,photo,place_id,type,url,vicinity,formatted_phone_number,opening_hours,website,price_level,rating,review,user_ratings_total&key=${config.GKEY}`;
+VenuesRouter.route('/:placeId')
+  .all(checkedLoggedIn)
+  .get(async (req, res, next) => {
+    try {
+      let { placeId } = req.params;
+      let venueQuery = `${config.GOOGLE_DETAIL_URL}?place_id=${placeId}&fields=name,formatted_address,id,geometry,name,photo,place_id,type,url,vicinity,formatted_phone_number,opening_hours,website,price_level,rating,review,user_ratings_total&key=${config.GKEY}`;
 
-    let { data } = await axios.get(venueQuery);
+      let { data } = await axios.get(venueQuery);
 
-    let dbQueries = [
-      VenuesService.getAmenitiesByVenue(
-        req.app.get('db'),
-        data.result.place_id
-      ),
-      VenuesService.getReviewsAndVotes(req.app.get('db'), data.result.place_id),
-      VenuesService.getAverages(req.app.get('db'), data.result.place_id),
-    ];
+      //Want to check if the user is logged in, and if so, we need to get the id for the favorite.
 
-    let [amenities, tsReviews, tsAverages] = await Promise.all(dbQueries);
+      let dbQueries = [
+        VenuesService.getAmenitiesByVenue(
+          req.app.get('db'),
+          data.result.place_id
+        ),
+        VenuesService.getReviewsAndVotes(
+          req.app.get('db'),
+          data.result.place_id
+        ),
+        VenuesService.getAverages(req.app.get('db'), data.result.place_id),
+      ];
 
-    data.amenities = amenities;
-    data.tsReviews = tsReviews;
-    data.tsAverages = tsAverages;
+      req.user
+        ? dbQueries.push(
+            VenuesService.getFavorite(
+              req.app.get('db'),
+              req.user.id,
+              data.result.place_id
+            )
+          )
+        : null;
 
-    res.send(data);
-  } catch (error) {
-    next(error);
-  }
-});
+      let [amenities, tsReviews, tsAverages, favorite] = await Promise.all(
+        dbQueries
+      );
+
+      if (req.user) {
+        let voteQueries = tsReviews.map(review => {
+          return VenuesService.getVoteStatus(
+            req.app.get('db'),
+            req.user.id,
+            review.id
+          );
+        });
+
+        let voteStatus = await Promise.all(voteQueries);
+
+        tsReviews = tsReviews.map((review, idx) => {
+          console.log(voteStatus[idx]);
+          return { ...review, ...voteStatus[idx] };
+        });
+      }
+
+      data.amenities = amenities;
+      data.tsReviews = tsReviews;
+      data.tsAverages = tsAverages;
+      data.favorite = favorite ? true : false;
+
+      console.log('sending');
+      res.send(data);
+    } catch (error) {
+      next(error);
+    }
+  });
 
 //! This is going to be obsolete, most likely.
 //Fetches the amenities for a specific venue
@@ -245,8 +282,6 @@ VenuesRouter.route('/addVenue').post(
     };
 
     const newAmenities = amenities;
-
-    console.log(newAmenities);
 
     for (const [key, value] of Object.entries(newVenue))
       if (!value || value === null) {

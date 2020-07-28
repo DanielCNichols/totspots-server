@@ -106,6 +106,27 @@ const VenuesService = {
       .where('venues.venue_id', venue_id)
       .groupBy('amenities.amenity_name', 'amenities.id');
   },
+
+  getFavorite(db, user_id, venueid) {
+    console.log('getting favorite');
+    return db
+      .from('favorites')
+      .select('*')
+      .where('favorites.user_id', user_id)
+      .andWhere('favorites.venueid', venueid)
+      .first();
+  },
+
+  getVoteStatus(db, user_id, reviewId) {
+    console.log('getting votes');
+    console.log(typeof user_id, typeof reviewId);
+    return db
+      .from('votes')
+      .select('votes.votestatus')
+      .where('votes.user_id', '=', user_id)
+      .andWhere('votes.review_id', '=', reviewId)
+      .first();
+  },
 };
 
 module.exports = VenuesService;
