@@ -7,18 +7,18 @@ const UserService = {
   hasUserWithUserName(db, username) {
     console.log('checking username');
     return db('users')
-      .where({ username })
+      .where({username})
       .first()
       .then(user => !!user);
   },
 
-  hasUserWithEmail(db, email) {
-    console.log('checking email');
-    return db('users')
-      .where({ email })
-      .first()
-      .then(user => !!user);
-  },
+  // hasUserWithEmail(db, email) {
+  //   console.log('checking email');
+  //   return db('users')
+  //     .where({ email })
+  //     .first()
+  //     .then(user => !!user);
+  // },
 
   validatePassword(password) {
     console.log('validating');
@@ -47,11 +47,12 @@ const UserService = {
   },
 
   serializeUser(user) {
-    console.log('serializeing');
     return {
       id: user.id,
       username: xss(user.username),
-      email: xss(user.email),
+      first_name: xss(user.first_name),
+      last_name: xss(user.last_name),
+      password: user.password,
     };
   },
 

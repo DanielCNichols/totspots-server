@@ -5,7 +5,7 @@ const config = require('../config');
 const AuthService = {
   getUserName(db, username) {
     return db('users')
-      .where({ username })
+      .where({username})
       .first();
   },
 
@@ -13,20 +13,19 @@ const AuthService = {
     return bcrypt.compare(password, hash);
   },
 
-  makeToken(sub, pay) {
+  createJWT(sub, pay) {
     return jwt.sign(pay, config.JWT_SECRET, {
       subject: sub,
-      algorithm: 'HS256'
+      expiresIn: config.JWT_EXPIRY,
+      algorithm: 'HS256',
     });
   },
 
   verifyJwt(token) {
     return jwt.verify(token, config.JWT_SECRET, {
-      algorithms: ['HS256']
+      algorithms: ['HS256'],
     });
-  }
+  },
 };
 
-module.exports = 
-  AuthService
-;
+module.exports = AuthService;

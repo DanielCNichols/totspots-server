@@ -1,11 +1,14 @@
 const Authorization = require('./AuthService');
 
 function requireAuth(req, res, next) {
+  console.log('in the auth');
   const authToken = req.get('Authorization') || '';
+  console.log('authtoken', authToken);
 
   let bearerToken;
+  console.log('got bearer', bearerToken);
   if (!authToken.toLowerCase().startsWith('bearer ')) {
-    return res.status(401).json({ error: 'Missing bearer token' });
+    return res.status(401).json({error: 'Missing bearer token'});
   } else {
     bearerToken = authToken.slice(7, authToken.length);
   }
@@ -15,9 +18,7 @@ function requireAuth(req, res, next) {
     Authorization.getUserName(req.app.get('db'), payload.sub)
       .then(user => {
         if (!user)
-          return res
-            .status(401)
-            .json({ error: 'Invalid username or password' });
+          return res.status(401).json({error: 'Invalid username or password'});
 
         req.user = user;
         next();
@@ -27,7 +28,7 @@ function requireAuth(req, res, next) {
         next(err);
       });
   } catch (error) {
-    res.status(401).json({ error: 'Invalid username or password' });
+    res.status(401).json({error: 'Invalid username or password'});
   }
 }
 

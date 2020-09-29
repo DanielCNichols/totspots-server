@@ -1,7 +1,7 @@
 const express = require('express');
 const UserRouter = express.Router();
 const jsonBodyParser = express.json();
-const { requireAuth } = require('../middleware/jwt-auth');
+const {requireAuth} = require('../middleware/jwt-auth');
 const UserService = require('./UserService');
 const xss = require('xss');
 const path = require('path');
@@ -10,25 +10,9 @@ const path = require('path');
 
 UserRouter.route('/').post(jsonBodyParser, async (req, res, next) => {
   try {
-    const {
-      first_name,
-      last_name,
-      city,
-      state,
-      email,
-      password,
-      username,
-    } = req.body;
+    const {first_name, last_name, password, username} = req.body;
 
-    for (const field of [
-      'first_name',
-      'last_name',
-      'city',
-      'state',
-      'email',
-      'password',
-      'username',
-    ])
+    for (const field of ['first_name', 'last_name', 'password', 'username'])
       if (!req.body[field])
         res.status(400).json({
           error: `Missing ${field} in request body`,
@@ -36,18 +20,7 @@ UserRouter.route('/').post(jsonBodyParser, async (req, res, next) => {
 
     const passwordError = UserService.validatePassword(password);
 
-    if (passwordError) return res.status(400).json({ error: passwordError });
-
-    const hasUserWithEmail = await UserService.hasUserWithEmail(
-      req.app.get('db'),
-      email
-    );
-
-    if (hasUserWithEmail)
-      return res.status(400).json({
-        error:
-          'An account already exists with this email. Did you forget your password?',
-      });
+    if (passwordError) return res.status(400).json({error: passwordError});
 
     const hasUserWithUserName = await UserService.hasUserWithUserName(
       req.app.get('db'),
@@ -55,21 +28,19 @@ UserRouter.route('/').post(jsonBodyParser, async (req, res, next) => {
     );
 
     if (hasUserWithUserName) {
-      return res.status(400).json({ error: 'This username is already taken' });
+      return res.status(400).json({error: 'This username is already taken'});
     }
 
     //all of it works, so then we insert it
 
     const hashedPassword = await UserService.hashPassword(password);
 
+    //NEED TO CLEAN THIS INPUT BEFORE IT GETS TO THE DB!
     const newUser = {
       first_name,
       last_name,
-      city,
-      state,
       username,
       password: hashedPassword,
-      email,
     };
 
     const user = await UserService.insertUser(req.app.get('db'), newUser);
@@ -108,8 +79,8 @@ UserRouter.route('/favorites')
       });
   })
   .post(requireAuth, jsonBodyParser, (req, res, next) => {
-    const { venue_id } = req.body;
-    const newFavorite = { venue_id };
+    const {venue_id} = req.body;
+    const newFavorite = {venue_id};
 
     newFavorite.user_id = req.user.id;
 
@@ -129,8 +100,8 @@ UserRouter.route('/favorites')
       });
   })
   .delete(requireAuth, jsonBodyParser, (req, res, next) => {
-    const { venue_id } = req.body;
-    const delFav = { venue_id };
+    const {venue_id} = req.body;
+    const delFav = {venue_id};
 
     delFav.user_id = req.user.id;
 
