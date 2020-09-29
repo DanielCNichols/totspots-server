@@ -84,6 +84,8 @@ VenuesRouter.route('/?').get(async (req, res, next) => {
 
     let venueQuery = `${config.GOOGLE_BASE_URL}?key=${config.GKEY}`; //Base url
 
+    console.log(venueQuery);
+
     //ToDO: Refactor this into a helper function and use the URLSearchParams().
     if (token) {
       venueQuery += `&pagetoken=${token}`;
@@ -95,6 +97,7 @@ VenuesRouter.route('/?').get(async (req, res, next) => {
     }
 
     let { data } = await axios.get(venueQuery);
+    console.log(data);
 
     let dbQueries = data.results.map(async entry => {
       let tsAverages = await VenuesService.getAverages(
