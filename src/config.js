@@ -7,5 +7,9 @@ module.exports = {
     process.env.TEST_DATABASE_URL ||
     'postgresql://daniel@localhost/totspots-test',
   JWT_SECRET: process.env.JWT_SECRET || 'totSpotsSecret',
-  CLIENT_ORIGIN: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+  CLIENT_ORIGIN: 'http://localhost:3000',
+  GKEY: process.env.GKEY || 'key',
+  GOOGLE_BASE_URL:
+    'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
+  GOOGLE_DETAIL_URL: 'https://maps.googleapis.com/maps/api/place/details/json',
 };

@@ -15,7 +15,9 @@ function requireAuth(req, res, next) {
     Authorization.getUserName(req.app.get('db'), payload.sub)
       .then(user => {
         if (!user)
-          return res.status(401).json({ error: 'Invalid username or password' });
+          return res
+            .status(401)
+            .json({ error: 'Invalid username or password' });
 
         req.user = user;
         next();
@@ -29,6 +31,36 @@ function requireAuth(req, res, next) {
   }
 }
 
+function checkedLoggedIn(req, res, next) {
+  const authToken = req.get('Authorization') || '';
+  let bearerToken;
+  if (!authToken.toLowerCase().startsWith('bearer ')) {
+    next();
+  } else {
+    bearerToken = authToken.slice(7, authToken.length);
+  }
+
+  //If no bearer token, we will get an actual string that says 'null', thanks to JSON.stringify();
+  //So, if not null, then find the user info for votes and favorites, else just move along to the route.
+  try {
+    if (bearerToken !== 'null') {
+      const payload = Authorization.verifyJwt(bearerToken);
+      Authorization.getUserName(req.app.get('db'), payload.sub).then(user => {
+        if (!user) {
+          next();
+        }
+        req.user = user;
+        next();
+      });
+    } else {
+      next();
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
-  requireAuth
+  requireAuth,
+  checkedLoggedIn,
 };

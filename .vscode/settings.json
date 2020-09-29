@@ -1,0 +1,37 @@
+{
+  "workbench.colorCustomizations": {
+    "[Gruvbox Dark (Hard)]": {
+      "editor.background": "#1a1616",
+      "statusBar.background": "#1f1f1f",
+      "statusBar.border": "#474545",
+      "sideBar.background": "#1a1616",
+      "statusBar.foreground": "#9c9a9a",
+      "tab.border": "#474545",
+      "editorGroupHeader.tabsBackground": "#1f1d1d",
+      "editorSuggestWidget.border": "#474545",
+      "editorSuggestWidget.background": "#1f1f1f",
+      "editorSuggestWidget.foreground": "#9c9a9a",
+      "editor.lineHighlightBackground": "#4643437c",
+      "titleBar.activeBackground": "#1a1616"
+    },
+    "[Darcula]": {
+      "editor.background": "#1b1919"
+    },
+    "[Hipster]": {
+      "editor.background": "#22313f",
+      "panel.background": "#22313f",
+      "editorGutter.background": "#22313f",
+      "editorLineNumber.foreground": "#fafafafa",
+      "editorGroupHeader.tabsBackground": "#fafafafa",
+      "statusBar.background": "#fafafaaf",
+      "sideBar.background": "#fafafa",
+      "tab.unfocusedInactiveForeground": "#22313f",
+      "tab.inactiveForeground": "#22313f",
+      "tab.inactiveBackground": "#fafafa8c",
+      "tab.border": "#22313f"
+    },
+    "activityBar.background": "#3E1274",
+    "titleBar.activeBackground": "#5619A2",
+    "titleBar.activeForeground": "#FBF9FE"
+  }
+}

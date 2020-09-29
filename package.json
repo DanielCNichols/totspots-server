@@ -20,6 +20,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.19.2",
+    "bcrypt": "^5.0.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^8.1.0",
@@ -28,7 +30,8 @@
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.19.5",
     "morgan": "^1.9.1",
-    "pg": "^7.12.1",
+    "pg": "^8.3.0",
+    "postgrator": "^4.0.1",
     "postgrator-cli": "^3.3.0",
     "xss": "^1.0.6"
   },

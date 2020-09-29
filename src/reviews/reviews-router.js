@@ -2,6 +2,8 @@ const express = require('express');
 const ReviewsService = require('./reviews-service');
 const path = require('path');
 const { requireAuth } = require('../middleware/jwt-auth');
+const axios = require('axios');
+const config = require('../config');
 
 const ReviewsRouter = express.Router();
 const jsonBodyParser = express.json();
@@ -25,15 +27,7 @@ async function checkReview(req, res, next) {
   }
 }
 
-//Gathers all of the reviews for a single venue, to be used on the reviews page.
-ReviewsRouter.route('/venues/:venueId/').get((req, res) => {
-  ReviewsService.getReviewsByVenue(req.app.get('db'), req.params.venueId).then(
-    reviews => {
-      res.json(reviews);
-    }
-  );
-});
-
+//! Obsolete?
 //Retrieves and posts votes for reviews.
 //Requires a review id.
 ReviewsRouter.route('/:reviewId/votes')
@@ -58,99 +52,128 @@ ReviewsRouter.route('/:reviewId/votes')
       .catch(next);
   });
 
-//Gathers the user's review history to populate the user profile page.
+//It works, but strip out all this duplicate action into a helper function.
+//This is an expensive page to load.
 ReviewsRouter.route('/userReviews')
   .all(requireAuth)
-  .get(requireAuth, (req, res, next) => {
-    ReviewsService.getUserReviews(req.app.get('db'), req.user.id)
-      .then(profile => {
-        res.json(profile);
-      })
-      .catch(next);
+  .get(async (req, res, next) => {
+    try {
+      let dbQueries = [
+        ReviewsService.getUserReviews(req.app.get('db'), req.user.id),
+        ReviewsService.getFavorites(req.app.get('db'), req.user.id),
+      ];
+
+      let [reviews, favorites] = await Promise.all(dbQueries);
+
+      //Got the reviews, now iterate and grab venue info.
+      let reviewRequests = reviews.map(review => {
+        let query = `${config.GOOGLE_DETAIL_URL}?place_id=${review.venueid}&fields=name,type,url,vicinity,website,formatted_phone_number,rating,price_level&key=${config.GKEY}`;
+        return axios.get(query);
+      });
+
+      let favoriteRequests = favorites.map(favorite => {
+        let query = `${config.GOOGLE_DETAIL_URL}?place_id=${favorite.venueid}&fields=name,type,url,vicinity,website,formatted_phone_number,rating,price_level&key=${config.GKEY}`;
+        return axios.get(query);
+      });
+
+      let reviewResults = await Promise.all(reviewRequests);
+      let favoriteResults = await Promise.all(favoriteRequests);
+
+      let reviewVenues = reviewResults.map(result => {
+        return result.data;
+      });
+
+      let favoriteVenues = favoriteResults.map(result => {
+        return result.data;
+      });
+
+      reviews = reviews.map((review, idx) => {
+        return { ...review, ...reviewVenues[idx] };
+      });
+
+      favorites = favorites.map((favorite, idx) => {
+        return { ...favorite, ...favoriteVenues[idx] };
+      });
+
+      let results = {
+        reviews,
+        favorites,
+      };
+
+      res.send(results);
+    } catch (err) {
+      next(err);
+    }
   });
 
-//Posts a new review to a specific venue.
-//The req.body contains the content of the review and the list of amenities.
-//The review and amenities are split off and posted to their respective tables in the DB.
-ReviewsRouter.route('/:venueId').post(
-  requireAuth,
-  jsonBodyParser,
-  (req, res, next) => {
-    const {
-      venue_id,
-      content,
-      price,
-      volume,
-      starrating,
-      amenities,
-    } = req.body;
-    const newReview = {
-      venue_id,
-      content,
-      price,
-      volume,
-      starrating,
-    };
-
-    for (const [key, value] of Object.entries(newReview))
-      if (!value || value === null) {
-        return res.status(400).json({ error: `Missing ${key} in request` });
+//*Keep!
+ReviewsRouter.route('/')
+  .all(requireAuth)
+  .post(jsonBodyParser, async (req, res, next) => {
+    try {
+      let { review } = req.body;
+      //Required fields are volume and rating.
+      if (!review.totspots_rating || !review.volume_rating) {
+        return res
+          .status(400)
+          .json({ error: `Rating and volume level are required` });
       }
 
-    newReview.user_id = req.user.id;
+      const { amenities, venueId, ...newReview } = review; //Cool destructuring!
 
-    ReviewsService.addReview(req.app.get('db'), newReview)
-      .then(review => {
-        ReviewsService.addAmenities(req.app.get('db'), amenities).then(() => {
-          res
-            .status(201)
-            .location(path.posix.join(req.originalUrl, `/${review.id}`))
-            .json(ReviewsService.serializeReview(review));
-        });
-      })
-      .catch(next);
-  }
-);
+      newReview.user_id = req.user.id;
+      newReview.venueid = venueId;
 
-//delete/edit reviews
-ReviewsRouter.route('/users/venues/:reviewId')
-  .all(checkReview)
-  .get((req, res, next) => {
-    ReviewsService.getReviewById(req.app.get('db'), req.params.reviewId)
-      .then(reviews => {
-        res.json(reviews);
-      })
-      .catch(next);
-  })
-  .delete((req, res, next) => {
-    ReviewsService.deleteReview(req.app.get('db'), req.params.reviewId)
-      .then(() => {
-        res.status(204).end();
-      })
-      .catch(next);
-  })
-  .patch(jsonBodyParser, (req, res, next) => {
-    const { content, starrating, price, volume } = req.body;
-    const updatedReview = { content, starrating, price, volume };
-
-    const numberOfValues = Object.values(updatedReview).filter(Boolean).length;
-    if (numberOfValues === 0) {
-      return res.status(400).json({
-        error: {
-          message: `Request must contain content, rating, price, or volume`,
-        },
+      // add the venueId to each of the amenities before inserting
+      let amenitiesToInsert = amenities.map(amenity => {
+        return { venueid: venueId, amenity: amenity };
       });
-    }
 
-    ReviewsService.updateReview(
-      req.app.get('db'),
-      req.params.reviewId,
-      updatedReview
-    )
-      .then(numRowsAffected => {
-        res.status(204).end();
-      })
-      .catch(next);
+      // Handle it at one time..
+      let dbInserts = [
+        ReviewsService.addReview(req.app.get('db'), newReview),
+        ReviewsService.addAmenities(req.app.get('db'), amenitiesToInsert),
+      ];
+
+      let [id] = await Promise.all(dbInserts);
+
+      let result = await ReviewsService.getNewReview(req.app.get('db'), id);
+
+      res.send(result);
+    } catch (err) {
+      next(err);
+    }
+  })
+  .delete(jsonBodyParser, async (req, res, next) => {
+    try {
+      let { id } = req.body;
+      //Todo: Need to check to see if the review actually exists!
+      await ReviewsService.deleteReview(req.app.get('db'), id);
+      res.status(204).end();
+    } catch (err) {
+      next(err);
+    }
+  })
+  .patch(jsonBodyParser, async (req, res, next) => {
+    try {
+      let { review } = req.body;
+
+      if (!review.totspots_rating || !review.volume_rating) {
+        return res
+          .status(400)
+          .json({ error: 'Rating and volume level are required' });
+      }
+
+      let updated = await ReviewsService.updateReview(
+        req.app.get('db'),
+        review.id,
+        review
+      );
+
+      res.send(updated);
+    } catch (err) {
+      next(err);
+    }
   });
 
 module.exports = ReviewsRouter;

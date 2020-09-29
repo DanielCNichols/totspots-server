@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS favorites;
+
+CREATE TABLE favorites
+(
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  venueId TEXT REFERENCES venues(venue_id) ON DELETE CASCADE NOT NULL
+);
